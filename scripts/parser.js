@@ -1,7 +1,10 @@
-const fs                                      = require('fs');
-const { alt, createLanguage, regexp, string } = require('parsimmon');
-const { klPath, klFiles, klExt }              = require('./config.js');
-const { flatMap }                             = require('../lib/utils.js');
+import fs from 'node:fs';
+import parsimmon from 'parsimmon';
+import config from './config.js';
+import { flatMap } from '../lib/utils.js';
+
+const { alt, createLanguage, regexp, string } = parsimmon;
+const { klPath, klFiles, klExt } = config;
 
 const language = createLanguage({
   whitespace: _ => regexp(/\s*/m),
@@ -16,4 +19,4 @@ const parseFile = s => language.file.tryParse(s);
 const parseForm = s => parseFile(s)[0];
 const parseKernel = () => flatMap(klFiles, file => parseFile(fs.readFileSync(`${klPath}/${file}${klExt}`, 'utf-8')));
 
-module.exports = { parseFile, parseForm, parseKernel };
+export { parseFile, parseForm, parseKernel };

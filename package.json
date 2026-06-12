@@ -1,6 +1,6 @@
 {
   "name": "shen-script",
-  "version": "0.17.0",
+  "version": "1.0.0",
   "description": "Shen for JavaScript",
   "keywords": [
     "shen",
@@ -9,9 +9,26 @@
   "author": "Robert Koeninger",
   "license": "BSD-3-Clause",
   "repository": "github:rkoeninger/ShenScript",
-  "main": "lib/shen.js",
+  "type": "module",
+  "main": "./lib/shen.node.js",
+  "exports": {
+    ".": {
+      "browser": "./lib/shen.web.js",
+      "default": "./lib/shen.node.js"
+    },
+    "./backend": "./lib/backend.js",
+    "./streams": "./lib/streams.node.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "shen-script": "./bin/shen.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "files": [
     "lib/*.js",
+    "bin/*.js",
     "kernel/LICENSE.txt"
   ],
   "devDependencies": {
@@ -27,7 +44,7 @@
     "astring": "^1.8.3"
   },
   "scripts": {
-    "lint": "eslint index.*.js lib/**/*.js scripts/**/*.js test/**/*.js --ignore-pattern lib/kernel.js",
+    "lint": "eslint index.*.js bin/*.js lib/**/*.js scripts/**/*.js test/**/*.js --ignore-pattern lib/kernel.js",
     "test": "npm run test-backend && npm run test-frontend && npm run test-kernel && npm run test-kernel-extensions",
     "vendor-kernel": "node scripts/vendor.js",
     "verify-kernel": "node scripts/verify-kernel.js",
@@ -36,7 +53,7 @@
     "test-kernel": "node test/kernel/test.kernel.js",
     "test-kernel-extensions": "node test/kernel/test.extensions.js",
     "test-frontend": "mocha test/frontend/test.*.js --reporter dot --timeout 5000",
-    "repl": "node scripts/repl.js",
+    "repl": "node bin/shen.js repl",
     "start": "webpack-cli --watch --env mode=development",
     "bundle-dev": "webpack-cli --env mode=development",
     "bundle": "webpack-cli --env mode=production",

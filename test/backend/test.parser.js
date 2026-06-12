@@ -1,7 +1,7 @@
-const { equal }     = require('assert');
-const forEach       = require('mocha-each');
-const { s }         = require('../../lib/utils.js');
-const { parseForm } = require('../../scripts/parser.js');
+import { equal } from 'node:assert';
+import forEach from 'mocha-each';
+import { s } from '../../lib/utils.js';
+import { parseForm } from '../../scripts/parser.js';
 
 describe('parsing', () => {
   describe('symbolic literals', () => {

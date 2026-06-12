@@ -1,19 +1,17 @@
 {
   "env": {
     "browser": true,
-    "commonjs": true,
-    "es6": true,
+    "es2022": true,
     "node": true,
     "mocha": true
   },
   "extends": "eslint:recommended",
   "globals": {
-    "Atomics": true,
-    "globalThis": true,
-    "SharedArrayBuffer": true
+    "Deno": "readonly"
   },
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 2022,
+    "sourceType": "module"
   },
   "rules": {
     "no-console": "off",

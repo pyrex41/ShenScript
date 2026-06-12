@@ -30,4 +30,4 @@ const measure = f => {
   }
 };
 
-module.exports = { formatDuration, formatGrid, measure };
+export { formatDuration, formatGrid, measure };

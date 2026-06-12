@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   kernelVersion: '41.2',
   kernelPath:    'kernel',
   testsPath:     'kernel/tests',

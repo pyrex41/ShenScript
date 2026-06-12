@@ -1,6 +1,8 @@
-const crypto = require('crypto');
-const fs     = require('fs');
-const { klPath } = require('./config.js');
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import config from './config.js';
+
+const { klPath } = config;
 
 const sums = fs.readFileSync(`${klPath}/SHA256SUMS`, 'utf-8')
   .split('\n')

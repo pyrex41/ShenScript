@@ -1,7 +1,7 @@
-const { equal, ok } = require('assert');
-const backend       = require('../../lib/backend.js');
-const kernel        = require('../../lib/kernel.js');
-const frontend      = require('../../lib/frontend.node.js');
+import { equal, ok } from 'node:assert';
+import backend from '../../lib/backend.js';
+import kernel from '../../lib/kernel.js';
+import frontend from '../../lib/frontend.node.js';
 
 describe('hack', () => it('dummy test so mocha runs the others', () => ok(true)));
 

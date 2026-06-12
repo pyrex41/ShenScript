@@ -4,13 +4,15 @@
 // and klambda/SHA256SUMS. After running, regenerate SHA256SUMS and
 // update PROVENANCE.md if the release version changed.
 
-const crypto = require('crypto');
-const fs     = require('fs');
-const os     = require('os');
-const path   = require('path');
-const { execFileSync } = require('child_process');
-const { kernelVersion, kernelPath, klPath } = require('./config.js');
-const { formatGrid } = require('./utils.js');
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import config from './config.js';
+import { formatGrid } from './utils.js';
+
+const { kernelVersion, kernelPath, klPath } = config;
 
 const archiveSha256 = '49f1b85d02348d9b3ebc461570c5c56cc066270ab81e35d5257625fb9d17fe82';
 const folderName  = `ShenOSKernel-${kernelVersion}`;

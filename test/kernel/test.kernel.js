@@ -1,13 +1,15 @@
 const dump = process.argv.includes('dump');
 
-const fs            = require('fs');
-const os            = require('os');
-const path          = require('path');
-const config        = require('../../lib/config.node.js');
-const backend       = require('../../lib/backend.js');
-const kernel        = require('../../lib/kernel.js');
-const { testsPath } = require('../../scripts/config.js');
-const { formatDuration, formatGrid, measure } = require('../../scripts/utils.js');
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import config from '../../lib/config.node.js';
+import backend from '../../lib/backend.js';
+import kernel from '../../lib/kernel.js';
+import scriptsConfig from '../../scripts/config.js';
+import { formatDuration, formatGrid, measure } from '../../scripts/utils.js';
+
+const { testsPath } = scriptsConfig;
 
 const InStream = class {
   constructor(buf) {

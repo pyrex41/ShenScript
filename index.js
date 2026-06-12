@@ -1,8 +1,14 @@
-const ShenBase = require('./lib/shen.js');
-const { StringInStream, fetchRead } = require('./lib/utils.js');
+import ShenBase, { createShen as createShenBase } from './lib/shen.web.js';
+import { StringInStream, fetchRead } from './lib/utils.js';
 
-window.Shen = class extends ShenBase {
-  constructor(options) {
-    super({ openRead: fetchRead, InStream: StringInStream, ...options });
+const webOptions = options => ({ openRead: fetchRead, InStream: StringInStream, ...options });
+
+export const createShen = (options = {}) => createShenBase(webOptions(options));
+
+export class Shen extends ShenBase {
+  constructor(options = {}) {
+    super(webOptions(options));
   }
-};
+}
+
+window.Shen = Shen;
