@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { parseKernel } from './parser.js';
 import backend from '../lib/backend.js';
 import {
-  Arrow, Block, Call, Const, ExportDefault, Id, ImportDefault, Program, Return, Statement,
+  Arrow, Block, Call, Const, ExportDefault, Id, ImportDefault, Let, Program, Return, Statement,
   generate
 } from '../lib/ast.js';
 import { formatDuration, formatGrid, measure } from './utils.js';
@@ -29,6 +29,7 @@ const measureRender = measure(() => {
       ExportDefault(Arrow(
         [Id('$')],
         Block(
+          Let(Id('w$')), // maybe-await slot for top-level forms (see lib/backend.js)
           ...Object.entries(body.subs).map(([key, value]) => Const(Id(key), value)),
           ...body.ast.body,
           Return(Id('$'))),

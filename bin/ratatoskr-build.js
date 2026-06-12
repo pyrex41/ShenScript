@@ -32,7 +32,7 @@ import backend from '../lib/backend.js';
 import overrides from '../lib/overrides.js';
 import { parseFile } from '../scripts/parser.js';
 import {
-  Arrow, Block, Call, Const, Id, Program, Return, Statement, generate
+  Arrow, Block, Call, Const, Id, Let, Program, Return, Statement, generate
 } from '../lib/ast.js';
 
 const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked]';
@@ -146,6 +146,7 @@ const program = generate(Program([
   Const(Id('run'), Arrow(
     [Id('$')],
     Block(
+      Let(Id('w$')), // maybe-await slot for top-level forms (see lib/backend.js)
       ...Object.entries(body.subs).map(([key, value]) => Const(Id(key), value)),
       ...body.ast.body,
       Return(Id('$'))),
