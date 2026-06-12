@@ -75,25 +75,27 @@ The default mode emits one self-contained ES module (~120KB for the fib demo, no
 
 ## Benchmarks
 
-Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.6, Deno 2.8.3. All three runtimes pass every suite; the times below are wall-clock for a single run.
+Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.14, Deno 2.8.3, after the call-path optimizations that landed the same day (arity-specialized wrappers; plain async wrappers; maybe-await call sites, sync demotion and let flattening — see the git log). All three runtimes pass every suite.
 
-**Test suites** (full backend: KL compiled at runtime through the async compiler path):
+**Test suites** (full eval-capable backend):
 
 | Suite | Node | Deno | Bun |
 |:--|--:|--:|--:|
-| `test-kernel` (134 kernel certification tests) | 19.0 s | 18.4 s | 50.1 s |
-| `test-kernel-extensions` (8 tests) | 0.5 s | 0.8 s | 1.1 s |
+| `test-kernel` (134 kernel certification tests) | ~10 s | ~9 s | ~19.5 s |
+| `test-kernel-extensions` (8 tests) | 0.4 s | 0.5 s | 0.7 s |
 
-**Standalone Ratatoskr artifacts** (AOT-compiled, eval-stripped; median of repeated runs, including process spawn):
+Before those optimizations the kernel suite ran 19.0 s / 18.4 s / 50.1 s (Bun 1.3.6) on the same machine — roughly 2× faster on Node/Deno and 2.5× on Bun. For reference, shen-lua under LuaJIT runs the equivalent certification suite in ~6 s.
 
-| Workload | Node | Deno | Bun |
-|:--|--:|--:|--:|
-| fib 20 (≈ pure startup + boot) | 116 ms | 52 ms | 52 ms |
-| fib 32 (~2.1M recursive calls) | 144 ms | 105 ms | 110 ms |
+**Standalone Ratatoskr artifacts** (AOT-compiled, eval-stripped; median of repeated runs, including process spawn; LuaJIT column is Ratatoskr's shen-lua target on the same shaken input, for reference):
 
-For reference against Ratatoskr's LuaJIT target: on these AOT artifacts LuaJIT runs 28 ms / 92 ms, so Bun and Deno are within ~15–25% on artifact compute (and the JS artifact is ~5× smaller, ~120 KB vs ~640 KB). The full kernel certification suite is a different story — shen-lua/LuaJIT runs it in ~6 s wall on the same machine vs 18–50 s here, because the suite exercises the async compiler path described below, an overhead the eval-stripped AOT artifacts don't pay.
+| Workload | Node | Deno | Bun | LuaJIT |
+|:--|--:|--:|--:|--:|
+| fib 20 (≈ pure startup + boot) | 112 ms | 56 ms | 50 ms | 27 ms |
+| fib 32 (~2.1M recursive calls) | 161 ms | 110 ms | 113 ms | 89 ms |
+
+The self-contained JS artifact is ~140 KB vs ~640 KB for the Lua one.
 
 Two notes on the spread:
 
-- Shen-level calls used to go through a variadic `(...args)` wrapper (currying support) that JavaScriptCore pays for far more heavily than V8. `funSync`/`funAsync` now emit arity-specialized fixed-parameter wrappers for arities 0–4, which made AOT artifacts 2.2× faster on Node and 4.7× faster on Bun.
-- The kernel suite is the opposite story: it exercises the full backend, where every call is an `async` function and gets awaited (so Shen code can transparently perform async I/O). V8's `await` is roughly 2× cheaper than JavaScriptCore's (an awaited recursive micro-benchmark runs 60 ms on Node, 86 ms on Deno, 136 ms on Bun), and that per-call overhead dominates a 134-test suite — hence Bun's slower suite time despite its fast startup and fast AOT-artifact numbers.
+- Shen-level calls go through wrappers that support currying. These used to be variadic `(...args)` functions — a pattern JavaScriptCore pays for far more heavily than V8 — and async wrappers added a second promise layer per call. Wrappers are now arity-specialized plain functions, and compiled call sites only `await` when the callee actually returned a Promise (most kernel functions now compile to plain sync functions). That work is what produced the suite numbers above.
+- The remaining Bun-vs-Node/Deno suite gap is engine-level: JSC's per-async-frame and promise-allocation throughput trails V8 on this workload (confirmed by Bun's own profiling in [oven-sh/bun#32208](https://github.com/oven-sh/bun/issues/32208), filed from this codebase). Bun's startup and sync-path performance are excellent — it's the fastest runtime here for the eval-stripped AOT artifacts.
