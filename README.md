@@ -18,7 +18,7 @@ An implementation of the [Shen Language](http://www.shenlanguage.org) by [Mark T
 
 ## Prerequisites
 
-Requires recent version (10+) of [Node.js and npm](https://nodejs.org/en/download/).
+Requires [Node.js](https://nodejs.org/en/download/) 20+. Also runs on [Bun](https://bun.sh) and [Deno](https://deno.com) 2 via their Node compatibility layers.
 
 Works in most modern browers (Chromium, Firefox, Safari and Edge).
 
@@ -59,6 +59,6 @@ Chaining the `then` call is necessary because `exec` will return a `Promise`. Fo
 
 ### REPL
 
-Run `npm run repl` to run a command-line REPL. It should have the same behavior as the `shen-cl` REPL. `node.` functions will be available. Run `(node.exit)` to exit the REPL.
+Run `npm run repl` (or `node bin/shen.js repl`) to run a command-line REPL. It should have the same behavior as the `shen-cl` REPL. `node.` functions will be available. Run `(node.exit)` to exit the REPL.
 
-Neither command-line options nor the `launcher` kernel extension are implemented. ShenScript is not intended to take the form of a standalone executable.
+The CLI passes its arguments to the kernel's `launcher` extension, so the standard launcher commands work: `node bin/shen.js repl`, `node bin/shen.js eval -e "(+ 1 1)"`, `node bin/shen.js script file.shen`, etc. The CLI also runs under `bun bin/shen.js` and `deno run -A bin/shen.js`.
