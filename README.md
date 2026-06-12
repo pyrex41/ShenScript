@@ -1,4 +1,4 @@
-[![Shen Version](https://img.shields.io/badge/shen-22.4-blue.svg)](https://github.com/Shen-Language)
+[![Shen Version](https://img.shields.io/badge/shen-41.2-blue.svg)](https://github.com/Shen-Language)
 [![Build Status](https://travis-ci.org/rkoeninger/ShenScript.svg?branch=master)](https://travis-ci.org/rkoeninger/ShenScript)
 [![Docs Status](https://readthedocs.org/projects/shenscript/badge/?version=latest)](https://shenscript.readthedocs.io/en/latest/?badge=latest)
 [![npm](https://img.shields.io/npm/v/shen-script.svg)](https://www.npmjs.com/package/shen-script)
@@ -14,8 +14,7 @@ An implementation of the [Shen Language](http://www.shenlanguage.org) by [Mark T
   * Allows integration with arbitrary I/O.
   * Async operations are transparent to written Shen code.
   * Easy interop: JS can be called from Shen, Shen can be called from JS.
-  * Fairly small production webpack bundle (\~370KB uncompressed, \~60KB gzip compressed).
-  * Decent web startup time (\~50ms in Chromium, \~100ms in Firefox).
+  * Fairly small production webpack bundle (\~670KB minified, \~110KB gzip compressed).
 
 ## Prerequisites
 
@@ -25,15 +24,17 @@ Works in most modern browers (Chromium, Firefox, Safari and Edge).
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. Steps need to be run in order - steps after `fetch-kernel` won't work if the kernel hasn't been fetched.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel sources ([shen-sources](https://github.com/Shen-Language/shen-sources.git) release 41.2) are vendored under `kernel/` - see `kernel/klambda/PROVENANCE.md`. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
-| Script          | Description                                                                                                       |
-|:----------------|:------------------------------------------------------------------------------------------------------------------|
-| `test-backend`  | Runs `mocha` tests for the basic environment and compiler.                                                        |
-| `fetch-kernel`  | Downloads the kernel sources from [shen-sources](https://github.com/Shen-Language/shen-sources.git) to `kernel/`. |
-| `render-kernel` | Translates the kernel sources to JavaScript and stores under `kernel/js/`.                                        |
-| `test-kernel`   | Runs the test suite that comes with the Shen kernel.                                                              |
-| `test-frontend` | Runs `mocha` tests for helper and interop functions.                                                              |
+| Script                   | Description                                                                                              |
+|:-------------------------|:---------------------------------------------------------------------------------------------------------|
+| `test-backend`           | Runs `mocha` tests for the basic environment and compiler.                                              |
+| `verify-kernel`          | Checks the vendored kernel sources against `kernel/klambda/SHA256SUMS`.                                 |
+| `vendor-kernel`          | Re-downloads the kernel release archive and refreshes `kernel/` (preserves `compiler.kl`, provenance).  |
+| `render-kernel`          | Translates the kernel sources to JavaScript at `lib/kernel.js`.                                         |
+| `test-kernel`            | Runs the certification test suite that comes with the Shen kernel.                                      |
+| `test-kernel-extensions` | Runs the kernel's extension test suite (programmable pattern matching).                                 |
+| `test-frontend`          | Runs `mocha` tests for helper and interop functions.                                                    |
 | `bundle-dev`    | Applies babel transforms and webpack's into web-deployable bundle.                                                |
 | `bundle`        | Builds bundle in production mode.                                                                                 |
 | `bundle-min`    | Builds minified production bundle.                                                                                |

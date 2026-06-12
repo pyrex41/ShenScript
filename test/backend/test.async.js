@@ -12,9 +12,14 @@ describe('async', () => {
     it('eval-kl', async () => {
       equal(5, await exec('(eval-kl (cons + (cons 2 (cons 3 ()))))'));
       equal(5, await f('eval-kl')(cons(s`+`, cons(2, cons(3, null)))));
-      equal(5, await f('eval-kl')([s`+`, 2, 3]));
       equal(5, await evalKl(cons(s`+`, cons(2, cons(3, null)))));
       equal(5, await evalKl([s`+`, 2, 3]));
+    });
+    it('eval-kl should self-evaluate atoms, including absvectors', async () => {
+      const vector = [s`+`, 2, 3];
+      equal(vector, await f('eval-kl')(vector));
+      equal(42, await f('eval-kl')(42));
+      equal(s`abc`, await f('eval-kl')(s`abc`));
     });
   });
 

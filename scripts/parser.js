@@ -5,7 +5,7 @@ const { flatMap }                             = require('../lib/utils.js');
 
 const language = createLanguage({
   whitespace: _ => regexp(/\s*/m),
-  numeric:    _ => regexp(/-?\d+/).map(Number),
+  numeric:    _ => regexp(/-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?(?![^\s()])/).map(Number),
   textual:    _ => regexp(/[^"]*/m).trim(string('"')),
   symbolic:   _ => regexp(/[^\s()]+/).map(Symbol.for),
   value:      r => alt(r.numeric, r.textual, r.symbolic, r.form),

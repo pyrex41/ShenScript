@@ -33,8 +33,8 @@ module.exports = env => ({
     path: path.resolve(__dirname, 'dist/'),
     filename: `shen-script${env.mode === 'development' ? '.dev' : env.min ? '.min' : ''}.js`
   },
-  stats: {
-    warningsFilter: w => w.includes('the request of a dependency is an expression')
-                      || w.includes('exceed')
-  }
+  ignoreWarnings: [
+    w => w.message.includes('the request of a dependency is an expression')
+      || w.message.includes('exceed')
+  ]
 });
