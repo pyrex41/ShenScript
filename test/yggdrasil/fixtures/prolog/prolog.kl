@@ -1,0 +1,5 @@
+(defun likes (V414 V415 V416 V417 V418 V419) (let W420 (if (shen.unlocked? V417) (let W421 (shen.lazyderef V414 V416) (let W422 (freeze (let W423 (shen.lazyderef V415 V416) (let W424 (freeze (do (shen.incinfs) (thaw V419))) (if (= W423 chocolate) (thaw W424) (if (shen.pvar? W423) (shen.bind! W423 chocolate V416 W424) false))))) (if (= W421 peter) (thaw W422) (if (shen.pvar? W421) (shen.bind! W421 peter V416 W422) false)))) false) (if (= W420 false) (if (shen.unlocked? V417) (let W425 (shen.lazyderef V414 V416) (let W426 (freeze (do (shen.incinfs) (likes peter V415 V416 V417 V418 V419))) (if (= W425 mary) (thaw W426) (if (shen.pvar? W425) (shen.bind! W425 mary V416 W426) false)))) false) W420)))
+
+(pr (cn "mary likes chocolate: " (shen.app (((((lambda V404 (lambda L405 (lambda K406 (lambda C407 (do (shen.incinfs) (likes mary chocolate V404 L405 K406 C407)))))) (shen.prolog-vector)) (@v true (@v 0 (vector 0)))) 0) (freeze true)) "
+" shen.a)) (stoutput))
+

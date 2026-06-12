@@ -52,7 +52,16 @@ const libDir = fileURLToPath(new URL('../lib/', import.meta.url));
  *  Manifest   *
  ***************/
 
-const manifestPath = path.join(shakenDir, 'yggdrasil.manifest.txt');
+// the tree-shaker was renamed Yggdrasil -> Ratatoskr; accept either manifest name
+const manifestPath = ['ratatoskr.manifest.txt', 'yggdrasil.manifest.txt']
+  .map(name => path.join(shakenDir, name))
+  .find(fs.existsSync);
+
+if (!manifestPath) {
+  console.error(`no ratatoskr.manifest.txt or yggdrasil.manifest.txt in ${shakenDir}`);
+  process.exit(1);
+}
+
 const manifest = { user: [], fn: [], primitive: [], 'primitive-optional': [], global: [] };
 
 for (const line of fs.readFileSync(manifestPath, 'utf-8').split('\n')) {

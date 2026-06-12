@@ -5,22 +5,35 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const fixture = path.join(root, 'test/yggdrasil/fixtures/fib');
+const fixtures = [
+  { name: 'fib',    expected: 'fib 20 = 6765\n' },
+  { name: 'prolog', expected: 'mary likes chocolate: true\n' }
+];
+
 const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'yggdrasil-'));
-const outFile = path.join(outDir, 'fib.js');
+let failed = false;
 
-console.log('- building self-contained artifact...');
-execFileSync(process.execPath, [path.join(root, 'bin/yggdrasil-build.js'), fixture, outFile], { stdio: 'inherit' });
+for (const { name, expected } of fixtures) {
+  const fixture = path.join(root, 'test/yggdrasil/fixtures', name);
+  const outFile = path.join(outDir, `${name}.js`);
 
-console.log('- running artifact...');
-const start = Date.now();
-const output = execFileSync(process.execPath, [outFile], { encoding: 'utf-8' });
-const duration = Date.now() - start;
+  console.log(`- building ${name} (self-contained)...`);
+  execFileSync(process.execPath, [path.join(root, 'bin/yggdrasil-build.js'), fixture, outFile], { stdio: 'inherit' });
 
-if (output !== 'fib 20 = 6765\n') {
-  console.error(`unexpected output: ${JSON.stringify(output)}`);
-  process.exit(1);
+  const start = Date.now();
+  const output = execFileSync(process.execPath, [outFile], { encoding: 'utf-8' });
+  const duration = Date.now() - start;
+
+  if (output === expected) {
+    console.log(`  ok - ${JSON.stringify(expected.trim())} in ${duration}ms (incl. process spawn)`);
+  } else {
+    console.error(`  FAIL - expected ${JSON.stringify(expected)}, got ${JSON.stringify(output)}`);
+    failed = true;
+  }
 }
 
-console.log(`ok - fib 20 = 6765 in ${duration}ms (incl. process spawn)`);
 fs.rmSync(outDir, { recursive: true, force: true });
+
+if (failed) {
+  process.exit(1);
+}
