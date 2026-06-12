@@ -1,0 +1,13 @@
+(defun make-expr (V392) (cons + (cons V392 (cons (cons * (cons V392 (cons V392 ()))) ()))))
+
+(pr (cn "eval list: " (shen.app (eval (make-expr 6)) "
+" shen.a)) (stoutput))
+
+(eval (cons define (cons triple (cons X (cons -> (cons (cons * (cons 3 (cons X ()))) ()))))))
+
+(pr (cn "eval define: " (shen.app (eval (cons triple (cons 14 ()))) "
+" shen.a)) (stoutput))
+
+(pr (cn "eval string: " (shen.app (eval (hd (read-from-string "(- (* 6 8) 6)"))) "
+" shen.a)) (stoutput))
+
