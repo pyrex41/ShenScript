@@ -1,11 +1,11 @@
-const fs                    = require('fs');
-const { addAsyncFunctions } = require('awaitify-stream');
-const Shen                  = require('../lib/shen.js');
+const fs   = require('fs');
+const Shen = require('../lib/shen.js');
 
 const InStream = class {
   constructor(stream, name) {
     this.name = name;
-    this.stream = addAsyncFunctions(stream);
+    this.stream = stream;
+    this.iter = stream[Symbol.asyncIterator]();
     this.buf = '';
     this.pos = 0;
   }
@@ -13,10 +13,15 @@ const InStream = class {
     if (this.pos < this.buf.length) {
       return this.buf[this.pos] === 13 ? (this.pos++, this.read()) : this.buf[this.pos++];
     }
-    const b = await this.stream.readAsync();
-    return b === null ? -1 : (this.buf = b, this.pos = 0, this.read());
+    const { value, done } = await this.iter.next();
+    return done ? -1 : (this.buf = value, this.pos = 0, this.read());
   }
-  close() { return this.stream.close(); }
+  close() {
+    if (typeof this.stream.destroy === 'function') {
+      this.stream.destroy();
+    }
+    return null;
+  }
 };
 
 const OutStream = class {
@@ -25,7 +30,12 @@ const OutStream = class {
     this.stream = stream;
   }
   write(b) { return this.stream.write(String.fromCharCode(b)); }
-  close() { return this.stream.close(); }
+  close() {
+    if (typeof this.stream.end === 'function') {
+      this.stream.end();
+    }
+    return null;
+  }
 };
 
 (async () => {

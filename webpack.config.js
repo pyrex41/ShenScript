@@ -15,20 +15,6 @@ module.exports = env => ({
       })
     ]
   },
-  module: {
-    rules: [
-      {
-        test: x => !x.includes('kernel.'),
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            plugins: ['@babel/plugin-proposal-object-rest-spread']
-          }
-        }
-      }
-    ]
-  },
   output: {
     path: path.resolve(__dirname, 'dist/'),
     filename: `shen-script${env.mode === 'development' ? '.dev' : env.min ? '.min' : ''}.js`
