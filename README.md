@@ -91,7 +91,7 @@ Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.6, 
 | fib 20 (≈ pure startup + boot) | 116 ms | 52 ms | 52 ms |
 | fib 32 (~2.1M recursive calls) | 144 ms | 105 ms | 110 ms |
 
-For reference, Ratatoskr's LuaJIT target runs the same artifacts in 28 ms / 92 ms — Bun and Deno are within ~15–25% on compute and the JS artifact is ~5× smaller (~120 KB vs ~640 KB).
+For reference against Ratatoskr's LuaJIT target: on these AOT artifacts LuaJIT runs 28 ms / 92 ms, so Bun and Deno are within ~15–25% on artifact compute (and the JS artifact is ~5× smaller, ~120 KB vs ~640 KB). The full kernel certification suite is a different story — shen-lua/LuaJIT runs it in ~6 s wall on the same machine vs 18–50 s here, because the suite exercises the async compiler path described below, an overhead the eval-stripped AOT artifacts don't pay.
 
 Two notes on the spread:
 
