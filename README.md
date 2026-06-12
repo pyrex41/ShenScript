@@ -72,3 +72,28 @@ node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked]
 ```
 
 The default mode emits one self-contained ES module (~120KB for the fib demo, no dependencies) that runs on Node 20+, Bun and Deno. `--linked` emits a small artifact that imports from this checkout and is the only mode supporting `needs-eval=true` programs.
+
+## Benchmarks
+
+Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.6, Deno 2.8.3. All three runtimes pass every suite; the times below are wall-clock for a single run.
+
+**Test suites** (full backend: KL compiled at runtime through the async compiler path):
+
+| Suite | Node | Deno | Bun |
+|:--|--:|--:|--:|
+| `test-kernel` (134 kernel certification tests) | 19.0 s | 18.4 s | 50.1 s |
+| `test-kernel-extensions` (8 tests) | 0.5 s | 0.8 s | 1.1 s |
+
+**Standalone Ratatoskr artifacts** (AOT-compiled, eval-stripped; median of repeated runs, including process spawn):
+
+| Workload | Node | Deno | Bun |
+|:--|--:|--:|--:|
+| fib 20 (≈ pure startup + boot) | 116 ms | 52 ms | 52 ms |
+| fib 32 (~2.1M recursive calls) | 144 ms | 105 ms | 110 ms |
+
+For reference, Ratatoskr's LuaJIT target runs the same artifacts in 28 ms / 92 ms — Bun and Deno are within ~15–25% on compute and the JS artifact is ~5× smaller (~120 KB vs ~640 KB).
+
+Two notes on the spread:
+
+- Shen-level calls used to go through a variadic `(...args)` wrapper (currying support) that JavaScriptCore pays for far more heavily than V8. `funSync`/`funAsync` now emit arity-specialized fixed-parameter wrappers for arities 0–4, which made AOT artifacts 2.2× faster on Node and 4.7× faster on Bun.
+- The kernel suite is the opposite story: it exercises the full backend, where every call is an `async` function and gets awaited (so Shen code can transparently perform async I/O). V8's `await` is roughly 2× cheaper than JavaScriptCore's (an awaited recursive micro-benchmark runs 60 ms on Node, 86 ms on Deno, 136 ms on Bun), and that per-call overhead dominates a 134-test suite — hence Bun's slower suite time despite its fast startup and fast AOT-artifact numbers.
