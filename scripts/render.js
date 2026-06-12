@@ -1,11 +1,11 @@
-const fs              = require('fs');
-const { parseKernel } = require('./parser.js');
-const backend         = require('../lib/backend.js');
-const {
-  Arrow, Assign, Block, Call, Const, Id, Literal, Member, Program, Return, Statement,
+import fs from 'node:fs';
+import { parseKernel } from './parser.js';
+import backend from '../lib/backend.js';
+import {
+  Arrow, Block, Call, Const, ExportDefault, Id, ImportDefault, Program, Return, Statement,
   generate
-} = require('../lib/ast.js');
-const { formatDuration, formatGrid, measure } = require('./utils.js');
+} from '../lib/ast.js';
+import { formatDuration, formatGrid, measure } from './utils.js';
 
 console.log('- parsing kernel...');
 const measureParse = measure(parseKernel);
@@ -21,18 +21,18 @@ const measureRender = measure(() => {
   const body = assemble(
     Block,
     ...measureParse.result.filter(isArray).map(construct),
-    Assign(Id('$'), Call(Call(Id('require'), [Literal('./overrides.js')]), [Id('$')])),
+    Call(Id('overrides'), [Id('$')]),
     assemble(Statement, construct([s`shen.initialise`])));
   return generate(
-    Program([Statement(Assign(
-      Member(Id('module'), Id('exports')),
-      Arrow(
+    Program([
+      ImportDefault(Id('overrides'), './overrides.js'),
+      ExportDefault(Arrow(
         [Id('$')],
         Block(
           ...Object.entries(body.subs).map(([key, value]) => Const(Id(key), value)),
           ...body.ast.body,
           Return(Id('$'))),
-        true)))]));
+        true))]));
 });
 const syntax = measureRender.result;
 console.log(`  rendered in ${formatDuration(measureRender.duration)}, ${syntax.length} chars`);

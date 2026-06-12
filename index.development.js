@@ -1,5 +1,5 @@
-const { Shen } = require('./index.js');
-const { onReady } = require('./lib/utils.js');
+import { Shen } from './index.js';
+import { onReady } from './lib/utils.js';
 
 (async () => {
   try {

@@ -1,7 +1,7 @@
-const { equal }     = require('assert');
-const forEach       = require('mocha-each');
-const { s }         = require('../../lib/utils.js');
-const { parseForm } = require('../../scripts/parser.js');
+import { equal } from 'node:assert';
+import forEach from 'mocha-each';
+import { s } from '../../lib/utils.js';
+import { parseForm } from '../../scripts/parser.js';
 
 describe('parsing', () => {
   describe('symbolic literals', () => {
@@ -29,6 +29,15 @@ describe('parsing', () => {
     });
     forEach([[-4, '-4'], [-143, '-143'], [-79, '-79']]).it('should parse negative numbers', (n, x) => {
       equal(n, parseForm(x));
+    });
+    forEach([[0.1, '0.1'], [1.6180339887498, '1.6180339887498'], [-0.7071067811865, '-0.7071067811865']]).it('should parse decimals', (n, x) => {
+      equal(n, parseForm(x));
+    });
+    forEach([[1e-4, '1e-4'], [2.5e3, '2.5e3'], [-1.5E+2, '-1.5E+2']]).it('should parse exponent notation', (n, x) => {
+      equal(n, parseForm(x));
+    });
+    it('should parse digit-led symbols as symbols', () => {
+      equal(s`1+`, parseForm('1+'));
     });
   });
   describe('forms', () => {

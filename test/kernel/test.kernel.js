@@ -1,12 +1,15 @@
 const dump = process.argv.includes('dump');
 
-const fs            = require('fs');
-const tempfile      = require('tempfile');
-const config        = require('../../lib/config.node.js');
-const backend       = require('../../lib/backend.js');
-const kernel        = require('../../lib/kernel.js');
-const { testsPath } = require('../../scripts/config.js');
-const { formatDuration, formatGrid, measure } = require('../../scripts/utils.js');
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import config from '../../lib/config.node.js';
+import backend from '../../lib/backend.js';
+import kernel from '../../lib/kernel.js';
+import scriptsConfig from '../../scripts/config.js';
+import { formatDuration, formatGrid, measure } from '../../scripts/utils.js';
+
+const { testsPath } = scriptsConfig;
 
 const InStream = class {
   constructor(buf) {
@@ -47,35 +50,48 @@ const formatResult = (failures, ignored) =>
 
   console.log(`- creating kernel...`);
   const measureCreate = await measure(() => kernel($));
-  const { evalKl, s, valueOf } = measureCreate.result;
+  const { defun, evalKl, s } = measureCreate.result;
   console.log(`  created in ${formatDuration(measureCreate.duration)}`);
+
+  // the 41.2 harness asks "failed; continue?" interactively on failure
+  defun('y-or-n?', _ => s`true`);
 
   console.log('- running test suite...');
   const measureRun = await measure(async () => {
     await evalKl([s`cd`, testsPath]);
-    await evalKl([s`load`, 'README.shen']);
-    await evalKl([s`load`, 'tests.shen']);
+    await evalKl([s`load`, 'harness.shen']);
+    await evalKl([s`load`, 'kerneltests.shen']);
   });
+  // kerneltests.shen ends with (reset), zeroing the counters, so the final
+  // globals are useless: the per-section "passed ... N" summary lines print the
+  // cumulative counters, so the last occurrence holds the suite totals
   const outputLog = stoutput.fromCharCodes();
-  const failures = valueOf('test-harness.*failed*');
+  const final = pattern => {
+    const matches = [...outputLog.matchAll(pattern)];
+    return matches.length === 0 ? -1 : Number(matches[matches.length - 1][1]);
+  };
+  const passed = final(/passed \.\.\. (\d+)/g);
+  const failures = final(/failed \.\.\. (\d+)/g);
   const ignored = 0;
+  const expected = 134;
+  console.log(`  passed: ${passed} (expected ${expected}), failed: ${failures}`);
   console.log(`  ran in ${formatDuration(measureRun.duration)}, ${formatResult(failures, ignored)}`);
 
-  if (failures > ignored) {
+  if (failures > ignored || passed !== expected) {
     if (dump) {
       console.log();
       console.log(outputLog);
     } else {
-      const outputPath = tempfile('.log');
+      const outputPath = path.join(os.tmpdir(), `shen-kernel-tests-${Date.now()}.log`);
       fs.writeFileSync(outputPath, outputLog);
       console.log(`  output log written to ${outputPath}`);
     }
   }
 
   console.log();
-  console.log(formatGrid(['Test Suite', formatResult(failures,  ignored), formatDuration(measureRun.duration)]));
+  console.log(formatGrid(['Test Suite', `${passed}/${expected} passed, ${failures} failed`, formatDuration(measureRun.duration)]));
 
-  if (failures > ignored) {
+  if (failures > ignored || passed !== expected) {
     process.exit(1);
   }
 })();

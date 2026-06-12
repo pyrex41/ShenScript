@@ -1,6 +1,6 @@
-const { equal, ok, throws } = require('assert');
-const forEach               = require('mocha-each');
-const backend               = require('../../lib/backend.js');
+import { equal, ok, throws } from 'node:assert';
+import forEach from 'mocha-each';
+import backend from '../../lib/backend.js';
 
 const { asString, cons, isCons, isString, evalKl, lookup, s, equate } = backend();
 const isShenBool = x => x === s`true` || x === s`false`;
@@ -32,7 +32,7 @@ describe('primitive', () => {
       forEach([[undefined, 55], [125, NaN], [-4, 'qwerty']]).it('should raise error for non-numbers', (x, y) => {
         throws(() => f('*')(x, y));
       });
-      forEach([34, -7, 449384736738485434.45945]).it('should return zero when multiplying by zero', x => {
+      forEach([34, -7, 4493847367384854.5]).it('should return zero when multiplying by zero', x => {
         equal(0, f('*')(0, x));
       });
     });
