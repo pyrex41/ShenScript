@@ -2,6 +2,8 @@ kernel.js
 dist
 node_modules
 out
+coverage
+.nyc_output
 _build
 _static
 _templates
