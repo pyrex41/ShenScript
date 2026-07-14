@@ -1,4 +1,4 @@
-(defun make-expr (V392) (cons + (cons V392 (cons (cons * (cons V392 (cons V392 ()))) ()))))
+(defun make-expr (V2918) (cons + (cons V2918 (cons (cons * (cons V2918 (cons V2918 ()))) ()))))
 
 (pr (cn "eval list: " (shen.app (eval (make-expr 6)) "
 " shen.a)) (stoutput))

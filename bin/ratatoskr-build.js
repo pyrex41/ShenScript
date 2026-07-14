@@ -88,7 +88,9 @@ if (manifest.user.length === 0) {
   console.error('manifest lists no user= files');
   process.exit(1);
 }
-if (manifest['kernel-version'] !== '41.2') {
+// Accept both plain "41.2" and the refresh's more specific stage-1 tag
+// (e.g. "41.2-s41r.20260711"), which share the vendored 41.2 kernel lineage.
+if (manifest['kernel-version'] !== '41.2' && !manifest['kernel-version'].startsWith('41.2-')) {
   console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder targets 41.2`);
 }
 if (manifest['manifest-version'] !== '2') {
