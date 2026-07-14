@@ -24,14 +24,16 @@ Works in most modern browers (Chromium, Firefox, Safari and Edge).
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel KLambda is vendored under `kernel/` from Mark Tarver's **S41.2 refresh** (2026-07-11 re-upload; canonical mirror `pyrex41/shen-s41.1`, tag `s41.2-pristine-20260711`) — a restructured kernel that reuses the `41.2` version number but is a different lineage from the community shen-sources 41.2. See `kernel/klambda/PROVENANCE.md` for the full delta and the ShenScript-specific vendored files. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel KLambda is vendored under `kernel/` from Mark Tarver's **S41.2 refresh** (2026-07-11 re-upload; canonical mirror `pyrex41/shen-s41.1`, tag `s41.2-pristine-20260711`) — a restructured kernel that reuses the `41.2` version number but is a different lineage from the community shen-sources 41.2. See `kernel/klambda/PROVENANCE.md` for the full delta and the ShenScript-specific vendored files. The standard library is built from its Shen sources under `kernel/lib/stlib/` (Tarver's refresh ships no precompiled `stlib.kl`); run `npm run build-kernel` (which runs `render-stlib` then `render-kernel`) for the full build from a clean checkout. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
 | `test-backend`           | Runs `mocha` tests for the basic environment and compiler.                                              |
 | `verify-kernel`          | Checks the vendored kernel sources against `kernel/klambda/SHA256SUMS`.                                 |
 | `vendor-kernel`          | Re-downloads the kernel release archive and refreshes `kernel/` (preserves `compiler.kl`, provenance).  |
+| `render-stlib`           | Compiles the Shen standard library from source (`kernel/lib/stlib/`) to the generated `kernel/klambda/stlib.kl`. |
 | `render-kernel`          | Translates the kernel sources to JavaScript at `lib/kernel.js`.                                         |
+| `build-kernel`           | Runs `render-stlib` then `render-kernel` — the full build from a clean checkout.                        |
 | `test-kernel`            | Runs the certification test suite that comes with the Shen kernel.                                      |
 | `test-kernel-extensions` | Runs the kernel's extension test suite (programmable pattern matching).                                 |
 | `test-frontend`          | Runs `mocha` tests for helper and interop functions.                                                    |

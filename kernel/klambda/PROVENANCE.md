@@ -51,19 +51,27 @@ reader sequent sys t-star toplevel track types writer yacc`.
 
 ## ShenScript-specific vendored files (NOT from the upstream kernel)
 
-These are carried by ShenScript and are **not** part of Tarver's refresh. They
-are listed in `SHA256SUMS` but are not byte-identical to any upstream S41.2 file:
+These are carried by ShenScript and are **not** part of Tarver's refresh.
+`stlib.kl` is generated (see below); the `extension-*.kl` are listed in
+`SHA256SUMS` but are not byte-identical to any upstream S41.2 file:
 
-- **`stlib.kl`** — the precompiled standard library from the **community**
-  ShenOSKernel-41.2 release (sha `a3904700...`, unchanged from the previous
-  vendoring). Tarver's refresh externalises the standard library to lazy Shen
-  sources under `Lib/StLib` that are loaded and type-checked at install time; it
-  ships no precompiled `stlib.kl`. ShenScript renders its kernel from KLambda in
-  a single image and has no source-based stlib install step, so it continues to
-  vendor the community precompiled `stlib.kl` to keep the standard library in the
-  booted image. The kernel `.kl` files it calls are API-stable, and `stlib.kl`
-  does not touch the removed dict/pointer layer, so it boots unchanged. Replacing
-  it with a source-built stlib against the refresh is future work.
+- **`stlib.kl`** — **generated, not vendored** (and gitignored). It is built from
+  the Shen standard-library **sources** under `kernel/lib/stlib/` by
+  `scripts/render-stlib.js` (`npm run render-stlib`, run first by
+  `npm run build-kernel`). Those sources are vendored from the canonical mirror
+  `pyrex41/shen-upstream`, tag `s41.2-pristine-20260711`, `Lib/StLib` — Tarver's
+  refresh externalises the standard library to these sources (loaded and
+  type-checked at install time via `install.shen`) and ships no precompiled
+  `stlib.kl`. The generator renders a stlib-less kernel, boots it (so the native
+  synchronous `@p` / `shen.pvar?` the type engine needs are installed before any
+  source is type-checked), runs `install.shen` through the kernel's own `load`
+  while intercepting `eval-kl` to capture the compiled `defun`s, then appends
+  `update-lambda-table` calls registering each exported function's arity and
+  lambda-table entry. That registration is what the **retired** community
+  precompiled `stlib.kl` (348 pure defuns) omitted, which is why it left
+  `(arity filter)` = -1 and `(fn filter)` undefined; the from-source build fixes
+  that. `stlib.kl` is therefore no longer in `SHA256SUMS` (it is generated, and
+  its gensym numbering is not stable across generations).
 - **`extension-features.kl`, `extension-expand-dynamic.kl`,
   `extension-launcher.kl`** — community extensions ShenScript boots (the
   launcher drives the CLI and Ratatoskr stage-1). They were compiled against the
