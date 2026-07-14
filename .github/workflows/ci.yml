@@ -19,7 +19,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run verify-kernel
-      - run: npm run render-kernel
+      - run: npm run build-kernel
       - run: npm run test-backend
       - run: npm run test-cli
       - run: npm run test-frontend
@@ -37,7 +37,7 @@ jobs:
           node-version: 22
       - uses: oven-sh/setup-bun@v2
       - run: npm ci
-      - run: npm run render-kernel
+      - run: npm run build-kernel
       - run: npm run test-smoke-bun
       - run: npm run test-kernel-bun
 
@@ -52,6 +52,6 @@ jobs:
         with:
           deno-version: v2.x
       - run: npm ci
-      - run: npm run render-kernel
+      - run: npm run build-kernel
       - run: npm run test-smoke-deno
       - run: npm run test-kernel-deno
