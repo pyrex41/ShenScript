@@ -4,7 +4,7 @@ import config from './config.js';
 import { flatMap } from '../lib/utils.js';
 
 const { alt, createLanguage, regexp, string } = parsimmon;
-const { klPath, klFiles, klExt } = config;
+const { klPath, klFiles, klFilesPostOverride, klExt } = config;
 
 const language = createLanguage({
   whitespace: _ => regexp(/\s*/m),
@@ -17,6 +17,10 @@ const language = createLanguage({
 });
 const parseFile = s => language.file.tryParse(s);
 const parseForm = s => parseFile(s)[0];
-const parseKernel = () => flatMap(klFiles, file => parseFile(fs.readFileSync(`${klPath}/${file}${klExt}`, 'utf-8')));
+const parseFiles = files => flatMap(files, file => parseFile(fs.readFileSync(`${klPath}/${file}${klExt}`, 'utf-8')));
+// Kernel modules booted before ShenScript's native overrides are installed.
+const parseKernel = () => parseFiles(klFiles);
+// Modules booted after overrides (init/declare forms + extensions + stlib).
+const parseKernelPostOverride = () => parseFiles(klFilesPostOverride);
 
-export { parseFile, parseForm, parseKernel };
+export { parseFile, parseForm, parseFiles, parseKernel, parseKernelPostOverride };

@@ -88,7 +88,9 @@ if (manifest.user.length === 0) {
   console.error('manifest lists no user= files');
   process.exit(1);
 }
-if (manifest['kernel-version'] !== '41.2') {
+// Accept both plain "41.2" and the refresh's more specific stage-1 tag
+// (e.g. "41.2-s41r.20260711"), which share the vendored 41.2 kernel lineage.
+if (manifest['kernel-version'] !== '41.2' && !manifest['kernel-version'].startsWith('41.2-')) {
   console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder targets 41.2`);
 }
 if (manifest['manifest-version'] !== '2') {
@@ -135,11 +137,20 @@ const parseKl = file => parseFile(fs.readFileSync(path.join(shakenDir, file), 'u
 const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
 
+// Call the manifest's init function (e.g. shen.initialise) only if the shaken
+// kernel actually defines it. The S41.2 refresh dropped shen.initialise and
+// initialises via top-level forms in the kernel itself, so a shake against that
+// lineage carries its initialisation inline and has no init function to call;
+// emitting an unconditional (shen.initialise) would fault at boot.
+const isSym = (x, name) => typeof x === 'symbol' && Symbol.keyFor(x) === name;
+const initDefined = manifest.init && kernelForms.some(f =>
+  isArray(f) && f.length >= 2 && isSym(f[0], 'defun') && isSym(f[1], manifest.init));
+
 const body = assemble(
   Block,
   ...kernelForms.filter(isArray).map(construct),
   Call(Id('overrides'), [Id('$')]),
-  assemble(Statement, construct([s`${manifest.init}`])),
+  ...(initDefined ? [assemble(Statement, construct([s`${manifest.init}`]))] : []),
   ...userForms.flatMap(({ forms }) => forms.filter(isArray).map(construct)));
 
 const program = generate(Program([

@@ -1,5 +1,17 @@
-// Re-vendors the kernel/ tree from the official ShenOSKernel release.
-// Preserves the files that are not part of the release archive:
+// Re-vendors the kernel/ tree from the community ShenOSKernel GitHub release.
+//
+// NOTE: as of the S41.2 (2026-07-11) refresh this script no longer matches the
+// vendored kernel lineage. The refreshed kernel comes from Mark Tarver's
+// re-upload (canonical mirror pyrex41/shen-s41.1, tag s41.2-pristine-20260711;
+// upstream https://www.shenlanguage.org/Download/S41.2.zip), which expands to a
+// DIFFERENT tree layout (KLambda/, Sources/, Lib/, Primitives/, Test Programs/)
+// than the community ShenOSKernel-<v>.zip this script downloads, and drops
+// compiler.kl/dict.kl/init.kl while adding backend.kl. It is kept for the
+// community lineage; to refresh the S-lineage kernel, copy KLambda/*.kl from the
+// mirror tag by hand, then regenerate SHA256SUMS and update PROVENANCE.md. See
+// kernel/klambda/PROVENANCE.md.
+//
+// Preserves the files that are not part of the community release archive:
 // klambda/compiler.kl (shen-cl build artifact), klambda/PROVENANCE.md
 // and klambda/SHA256SUMS. After running, regenerate SHA256SUMS and
 // update PROVENANCE.md if the release version changed.
