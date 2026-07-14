@@ -24,7 +24,7 @@ Works in most modern browers (Chromium, Firefox, Safari and Edge).
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel sources ([shen-sources](https://github.com/Shen-Language/shen-sources.git) release 41.2) are vendored under `kernel/` - see `kernel/klambda/PROVENANCE.md`. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel KLambda is vendored under `kernel/` from Mark Tarver's **S41.2 refresh** (2026-07-11 re-upload; canonical mirror `pyrex41/shen-s41.1`, tag `s41.2-pristine-20260711`) — a restructured kernel that reuses the `41.2` version number but is a different lineage from the community shen-sources 41.2. See `kernel/klambda/PROVENANCE.md` for the full delta and the ShenScript-specific vendored files. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
