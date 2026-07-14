@@ -142,13 +142,18 @@ const serialize = node => {
 };
 
 const defunText = [...defunByName.values()].map(f => serialize(toArrayTree(f))).join('\n\n');
-const regText = registrations.map(([name, arity]) => `(update-lambda-table ${name} ${arity})`).join('\n');
+// update-lambda-table registers arity + lambda-table entry (fixes (arity f)/(fn f)).
+const lambdaText = registrations.map(([name, arity]) => `(update-lambda-table ${name} ${arity})`).join('\n');
+// systemf mirrors install.shen's tail `(map (fn systemf) ExternalF)`: it adjoins
+// each exported function into the shen package's shen.external-symbols, so
+// (external shen) and package-qualified resolution match a from-source install.
+const systemfText = registrations.map(([name]) => `(systemf ${name})`).join('\n');
 
 // No comment header: the KL reader (scripts/parser.js) has no comment syntax, so
 // any prose here would parse as spurious forms. This file is generated and
 // gitignored; provenance lives in kernel/klambda/PROVENANCE.md and the banner
 // printed by this script.
-fs.writeFileSync(outFile, `${defunText}\n\n${regText}\n`);
+fs.writeFileSync(outFile, `${defunText}\n\n${lambdaText}\n\n${systemfText}\n`);
 fs.rmSync(tmpKernel, { force: true });
 
 console.log();
