@@ -22,9 +22,23 @@ Requires [Node.js](https://nodejs.org/en/download/) 20+. Also runs on [Bun](http
 
 Works in most modern browers (Chromium, Firefox, Safari and Edge).
 
+## Installing
+
+**The published npm package [`shen-script`](https://www.npmjs.com/package/shen-script) (0.17.0, upstream) is library-only and stale**: it predates this fork, has no `bin` entry and ships no `bin/shen.js`, so `npm install -g shen-script` cannot produce a command-line Shen — and it carries an older kernel than the 41.2 vendored here.
+
+For a working CLI, install from this repo:
+
+```sh
+git clone https://github.com/pyrex41/ShenScript && cd ShenScript
+npm install          # installs deps; the prepare hook renders lib/kernel.js
+node bin/shen.js --version
+```
+
+or as a git dependency (`npm install github:pyrex41/ShenScript`), which also triggers the kernel render and links the `shen-script` bin. The generated `lib/kernel.js` is not checked in; `npm run build-kernel` re-renders it explicitly, and runtime needs `node_modules` present (`bin/shen.js` imports `astring`).
+
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel KLambda is vendored under `kernel/` from Mark Tarver's **S41.2 refresh** (2026-07-11 re-upload; canonical mirror `pyrex41/shen-s41.1`, tag `s41.2-pristine-20260711`) — a restructured kernel that reuses the `41.2` version number but is a different lineage from the community shen-sources 41.2. See `kernel/klambda/PROVENANCE.md` for the full delta and the ShenScript-specific vendored files. The standard library is built from its Shen sources under `kernel/lib/stlib/` (Tarver's refresh ships no precompiled `stlib.kl`); run `npm run build-kernel` (which runs `render-stlib` then `render-kernel`) for the full build from a clean checkout. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel KLambda is vendored under `kernel/` from Mark Tarver's **S41.2 refresh** (2026-07-11 re-upload; canonical mirror `pyrex41/shen-s41.1`, tag `s41.2-pristine-20260711`) — a restructured kernel that reuses the `41.2` version number but is a different lineage from the community shen-sources 41.2. See `kernel/klambda/PROVENANCE.md` for the full delta and the ShenScript-specific vendored files. The standard library is built from its Shen sources under `kernel/lib/stlib/` (Tarver's refresh ships no precompiled `stlib.kl`); run `npm run build-kernel` (which runs `render-stlib` then `render-kernel`) for the full build from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
