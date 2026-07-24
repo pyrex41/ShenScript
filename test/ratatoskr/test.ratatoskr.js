@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const fixtures = [
@@ -52,6 +52,51 @@ for (const { name, expected, linked } of fixtures) {
     console.error(`  FAIL - expected ${JSON.stringify(expected)}, got ${JSON.stringify(output)}`);
     failed = true;
   }
+}
+
+// --- --web target: a browser-safe module that boots and exports the env ---
+// The output must carry no node built-ins, and importing it must both run the
+// program's top-level forms (fib prints via console) and expose callable Shen
+// functions with JS<->Shen marshalling through the exported `$`.
+{
+  const name = 'fib';
+  const fixture = path.join(root, 'test/ratatoskr/fixtures', name);
+  // .mjs so it's imported as ESM irrespective of the temp dir's package scope.
+  const outFile = path.join(outDir, `${name}.web.mjs`);
+  console.log(`- building ${name} (--web)...`);
+  execFileSync(process.execPath, [path.join(root, 'bin/ratatoskr-build.js'), fixture, outFile, '--web'], { stdio: 'inherit' });
+
+  const src = fs.readFileSync(outFile, 'utf-8');
+  const leaks = ['node:fs', 'streams.node', 'process.', 'import fs'].filter(t => src.includes(t));
+  if (leaks.length === 0) {
+    console.log('  ok - browser-safe (no node built-ins)');
+  } else {
+    console.error(`  FAIL - web output leaked node-isms: ${leaks.join(', ')}`);
+    failed = true;
+  }
+
+  // Import boots the runtime and runs the top-level forms (prints "fib 20 …");
+  // assert the exported env exposes a working caller with number marshalling.
+  const $ = (await import(pathToFileURL(outFile).href)).default;
+  const got = $.caller('fib')(10);
+  if (got === 55) {
+    console.log('  ok - caller("fib")(10) === 55 via exported $');
+  } else {
+    console.error(`  FAIL - caller fib(10): expected 55, got ${JSON.stringify(got)}`);
+    failed = true;
+  }
+}
+
+// --web must refuse --linked (it is always self-contained).
+{
+  let refused = false;
+  try {
+    execFileSync(process.execPath,
+      [path.join(root, 'bin/ratatoskr-build.js'), path.join(root, 'test/ratatoskr/fixtures/fib'), path.join(outDir, 'x.js'), '--web', '--linked'],
+      { stdio: 'pipe' });
+  } catch { refused = true; }
+  console.log(refused ? '  ok - --web --linked refused' : '  FAIL - --web --linked was accepted');
+  if (!refused) failed = true;
 }
 
 fs.rmSync(outDir, { recursive: true, force: true });
