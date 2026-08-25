@@ -22,7 +22,7 @@
   },
   "bin": {
     "shen-script": "./bin/shen.js",
-    "ratatoskr-build": "./bin/ratatoskr-build.js"
+    "yggdrasil-build": "./bin/yggdrasil-build.js"
   },
   "engines": {
     "node": ">=20"
@@ -64,7 +64,7 @@
     "test-kernel-deno": "deno run --allow-read --allow-write --allow-env test/kernel/test.kernel.js",
     "test-kernel-extensions": "node test/kernel/test.extensions.js",
     "test-smoke": "node test/smoke.js",
-    "test-ratatoskr": "node test/ratatoskr/test.ratatoskr.js",
+    "test-yggdrasil": "node test/yggdrasil/test.yggdrasil.js",
     "test-smoke-bun": "bun test/smoke.js",
     "test-smoke-deno": "deno run --allow-read --allow-env test/smoke.js",
     "test-frontend": "mocha test/frontend/test.*.js --reporter dot --timeout 5000",

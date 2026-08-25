@@ -79,12 +79,12 @@ Run `npm run repl` (or `node bin/shen.js repl`) to run a command-line REPL. It s
 
 The CLI passes its arguments to the kernel's `launcher` extension, so the standard launcher commands work: `node bin/shen.js repl`, `node bin/shen.js eval -e "(+ 1 1)"`, `node bin/shen.js script file.shen`, etc. The CLI also runs under `bun bin/shen.js` and `deno run -A bin/shen.js`.
 
-### Ratatoskr (tree-shaken standalone programs)
+### Yggdrasil (tree-shaken standalone programs)
 
-ShenScript is a stage-2 target for [Ratatoskr](https://github.com/pyrex41/ratatoskr) (formerly Yggdrasil 2.0), the Shen tree-shaker. Given a stage-1 output directory (shaken `kernel.kl` + user `.kl` files + `ratatoskr.manifest.txt`):
+ShenScript is a stage-2 target for [Yggdrasil](https://github.com/pyrex41/yggdrasil), the Shen tree-shaker. Given a stage-1 output directory (shaken `kernel.kl` + user `.kl` files + `yggdrasil.manifest.txt`):
 
 ```
-node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked]
+node bin/yggdrasil-build.js <shaken-dir> <out.js> [--linked]
 ```
 
 The default mode emits one self-contained ES module (~120KB for the fib demo, no dependencies) that runs on Node 20+, Bun and Deno. `--linked` emits a small artifact that imports from this checkout and is the only mode supporting `needs-eval=true` programs.
@@ -102,7 +102,7 @@ Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.14,
 
 Before those optimizations the kernel suite ran 19.0 s / 18.4 s / 50.1 s (Bun 1.3.6) on the same machine — roughly 2× faster on Node/Deno and 2.5× on Bun. For reference, shen-lua under LuaJIT runs the equivalent certification suite in ~6 s.
 
-**Standalone Ratatoskr artifacts** (AOT-compiled, eval-stripped; median of repeated runs, including process spawn; LuaJIT column is Ratatoskr's shen-lua target on the same shaken input, for reference):
+**Standalone Yggdrasil artifacts** (AOT-compiled, eval-stripped; median of repeated runs, including process spawn; LuaJIT column is Yggdrasil's shen-lua target on the same shaken input, for reference):
 
 | Workload | Node | Deno | Bun | LuaJIT |
 |:--|--:|--:|--:|--:|

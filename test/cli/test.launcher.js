@@ -16,7 +16,7 @@
 //     sets an `eof` flag), since the kernel shen.loop spins forever otherwise.
 //   - -q quiet mode STILL writes pr output to a file. ShenScript (like
 //     shen-cl and shen-go, unlike shen-lua/shen-rust) routes pr to file
-//     streams regardless of *hush*. This is the ratatoskr stage-1 regression.
+//     streams regardless of *hush*. This is the yggdrasil stage-1 regression.
 //   - adversarial input reports an error and exits nonzero without an
 //     unhandled rejection / crash (no Node stack trace dump).
 import { equal, ok } from 'node:assert';
@@ -116,7 +116,7 @@ describe('CLI launcher (port-authored, mirrors shen-go main_test)', function () 
   });
 
   describe('quiet mode (-q) still writes pr to files', () => {
-    it('routes pr output to a file regardless of *hush* (ratatoskr stage-1 regression)', () => {
+    it('routes pr output to a file regardless of *hush* (yggdrasil stage-1 regression)', () => {
       const outFile = tmp('out.txt');
       const expr = `(let S (open "${outFile.replace(/\\/g, '\\\\')}" out) (do (pr "payload" S) (close S)))`;
       try {

@@ -74,7 +74,7 @@ These are carried by ShenScript and are **not** part of Tarver's refresh.
   its gensym numbering is not stable across generations).
 - **`extension-features.kl`, `extension-expand-dynamic.kl`,
   `extension-launcher.kl`** — community extensions ShenScript boots (the
-  launcher drives the CLI and Ratatoskr stage-1). They were compiled against the
+  launcher drives the CLI and Yggdrasil stage-1). They were compiled against the
   pre-refresh lambda-form API; `lib/overrides.js` provides a
   `shen.set-lambda-form-entry` compatibility shim that writes into the refresh's
   `shen.*lambdatable*` so they keep working.
