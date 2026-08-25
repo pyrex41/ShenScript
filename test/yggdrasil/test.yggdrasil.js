@@ -13,18 +13,18 @@ const fixtures = [
   { name: 'metaeval', expected: 'eval list: 42\neval define: 42\neval string: 42\n', linked: true }
 ];
 
-const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ratatoskr-'));
+const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'yggdrasil-'));
 let failed = false;
 
 for (const { name, expected, linked } of fixtures) {
-  const fixture = path.join(root, 'test/ratatoskr/fixtures', name);
+  const fixture = path.join(root, 'test/yggdrasil/fixtures', name);
   const outFile = path.join(outDir, `${name}.js`);
 
   if (linked) {
     console.log(`- building ${name} (self-contained, expecting refusal)...`);
     let refused = false;
     try {
-      execFileSync(process.execPath, [path.join(root, 'bin/ratatoskr-build.js'), fixture, outFile], { stdio: 'pipe' });
+      execFileSync(process.execPath, [path.join(root, 'bin/yggdrasil-build.js'), fixture, outFile], { stdio: 'pipe' });
     } catch {
       refused = true;
     }
@@ -38,7 +38,7 @@ for (const { name, expected, linked } of fixtures) {
 
   const mode = linked ? 'linked' : 'self-contained';
   console.log(`- building ${name} (${mode})...`);
-  const buildArgs = [path.join(root, 'bin/ratatoskr-build.js'), fixture, outFile];
+  const buildArgs = [path.join(root, 'bin/yggdrasil-build.js'), fixture, outFile];
   if (linked) buildArgs.push('--linked');
   execFileSync(process.execPath, buildArgs, { stdio: 'inherit' });
 
@@ -60,11 +60,11 @@ for (const { name, expected, linked } of fixtures) {
 // functions with JS<->Shen marshalling through the exported `$`.
 {
   const name = 'fib';
-  const fixture = path.join(root, 'test/ratatoskr/fixtures', name);
+  const fixture = path.join(root, 'test/yggdrasil/fixtures', name);
   // .mjs so it's imported as ESM irrespective of the temp dir's package scope.
   const outFile = path.join(outDir, `${name}.web.mjs`);
   console.log(`- building ${name} (--web)...`);
-  execFileSync(process.execPath, [path.join(root, 'bin/ratatoskr-build.js'), fixture, outFile, '--web'], { stdio: 'inherit' });
+  execFileSync(process.execPath, [path.join(root, 'bin/yggdrasil-build.js'), fixture, outFile, '--web'], { stdio: 'inherit' });
 
   const src = fs.readFileSync(outFile, 'utf-8');
   const leaks = ['node:fs', 'streams.node', 'process.', 'import fs'].filter(t => src.includes(t));
@@ -92,7 +92,7 @@ for (const { name, expected, linked } of fixtures) {
   let refused = false;
   try {
     execFileSync(process.execPath,
-      [path.join(root, 'bin/ratatoskr-build.js'), path.join(root, 'test/ratatoskr/fixtures/fib'), path.join(outDir, 'x.js'), '--web', '--linked'],
+      [path.join(root, 'bin/yggdrasil-build.js'), path.join(root, 'test/yggdrasil/fixtures/fib'), path.join(outDir, 'x.js'), '--web', '--linked'],
       { stdio: 'pipe' });
   } catch { refused = true; }
   console.log(refused ? '  ok - --web --linked refused' : '  FAIL - --web --linked was accepted');

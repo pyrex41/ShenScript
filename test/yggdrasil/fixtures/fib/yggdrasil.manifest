@@ -1,4 +1,4 @@
-("ratatoskr-manifest" 2)
+("yggdrasil-manifest" 3)
 ("kernel-version" "41.2-s41r.20260711")
 ("kernel" "kernel.kl")
 ("init" shen.initialise)

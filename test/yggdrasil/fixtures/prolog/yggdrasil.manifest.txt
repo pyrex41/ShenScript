@@ -1,4 +1,4 @@
-manifest-version=2
+manifest-version=3
 kernel-version=41.2-s41r.20260711
 kernel=kernel.kl
 init=shen.initialise

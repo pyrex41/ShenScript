@@ -82,7 +82,7 @@ describe('streams (port-authored regression for 4c03a96)', () => {
       out.writeString('payload');
       out.close();
       // A fresh sync read sees the bytes immediately (the contract the
-      // ratatoskr bootstrap depends on: write a file, read it right back).
+      // yggdrasil bootstrap depends on: write a file, read it right back).
       const inn = new FileInStream(p);
       const bytes = [];
       for (let b = inn.read(); b !== -1; b = inn.read()) {
