@@ -115,3 +115,22 @@ Two notes on the spread:
 
 - Shen-level calls go through wrappers that support currying. These used to be variadic `(...args)` functions — a pattern JavaScriptCore pays for far more heavily than V8 — and async wrappers added a second promise layer per call. Wrappers are now arity-specialized plain functions, and compiled call sites only `await` when the callee actually returned a Promise (most kernel functions now compile to plain sync functions). That work is what produced the suite numbers above.
 - The remaining Bun-vs-Node/Deno suite gap is engine-level: JSC's per-async-frame and promise-allocation throughput trails V8 on this workload (confirmed by Bun's own profiling in [oven-sh/bun#32208](https://github.com/oven-sh/bun/issues/32208), filed from this codebase). Bun's startup and sync-path performance are excellent — it's the fastest runtime here for the eval-stripped AOT artifacts.
+## Optional Nix environment
+
+Nix is optional; the normal ShenScript build and launcher commands continue to work
+with tools installed by any method. For a pinned development toolchain:
+
+```sh
+nix develop
+```
+
+The flake also exports `packages.toolchain` for composition by
+[Bifrost](https://github.com/pyrex41/bifrost):
+
+```sh
+nix shell .#toolchain
+```
+
+If direnv is installed, `direnv allow` opts this checkout into the same dev
+shell automatically. Nothing activates until that explicit authorization, and
+Nix is never required at runtime.
