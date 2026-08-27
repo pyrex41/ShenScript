@@ -49,6 +49,18 @@ const OutStream = class {
   // reports pass/fail counts instead of aborting.
   defun('y-or-n?', _ => s`true`);
 
+  // Shen's S42 core resolves `fn` through shen.*lambdatable*. The optional
+  // extensions call set-lambda-form-entry, so verify our adapter populates
+  // that table rather than the obsolete shen.lambda-form property.
+  defun('extension-regression', x => x);
+  await evalKl([s`shen.set-lambda-form-entry`,
+    [s`cons`, s`extension-regression`, [s`lambda`, s`X`, s`X`]]]);
+  const extensionFn = await evalKl([s`fn`, s`extension-regression`]);
+  const extensionResult = await extensionFn(s`ok`);
+  if (extensionResult !== s`ok`) {
+    throw new Error('set-lambda-form-entry did not register fn in S42 table');
+  }
+
   // The only suite here exercises the opt-in programmable-pattern-matching
   // extension, which plugs into the kernel's shen.custom-pattern-compiler /
   // shen.custom-pattern-reducer hooks. Tarver's S41.2 refresh (2026-07-11)
