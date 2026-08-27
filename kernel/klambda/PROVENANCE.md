@@ -1,17 +1,15 @@
 # Provenance
 
-The kernel KLambda under this directory tracks **Mark Tarver's S41.2 refresh**,
-re-uploaded on **2026-07-11**. Note that upstream reused the `41.2` version
-number for a **restructured kernel** with different lineage from the community
-ShenOSKernel-41.2 this checkout previously built against, so treat the string
-"41.2" as ambiguous: here it means **S41.2 (2026-07-11 refresh)**.
+The kernel KLambda under this directory tracks **Mark Tarver's pristine S42**,
+mirror commit `28825a211f5b2fb952510dab17267ca8eb9594a0`, tag
+`s42-pristine-20260825`.
 
 ## Canonical source
 
-- Mirror repo: `pyrex41/shen-s41.1` (private), the designated canonical mirror
+- Mirror repo: `pyrex41/shen-upstream` (private), the designated canonical mirror
   of Tarver's uploads.
-- Tag: `s41.2-pristine-20260711`
-- Commit: `11fc51b`
+- Tag: `s42-pristine-20260825`
+- Commit: `28825a2`
 - Path in the tag: `KLambda/*.kl`
 
 The 15 kernel `.kl` files listed in `SHA256SUMS` (all except `stlib.kl` and the
@@ -20,9 +18,8 @@ tag. Verified by `git show <tag>:KLambda/<f>.kl | cmp -` against each file.
 
 ### Secondary source (the mirror's own upstream)
 
-- URL: <https://www.shenlanguage.org/Download/S41.2.zip>
-- Last-Modified: 2026-07-11
-- Archive SHA-256: `51becbfd60fa8c93c3f8ae5b20b948eaa84c4b1d14ad2f5d2a056002a53ee836`
+- URL: <https://www.shenlanguage.org/Download/S42.zip>
+- Archive: mirror commit `28825a2`
 
 The archive expands to a different tree layout than the community release
 (`KLambda/`, `Sources/`, `Lib/`, `Primitives/`, `Test Programs/`), which is why

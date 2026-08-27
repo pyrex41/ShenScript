@@ -87,7 +87,7 @@ describe('CLI launcher (port-authored, mirrors shen-go main_test)', function () 
     it('--version prints the version banner and exits 0', () => {
       const res = runCLI(['--version']);
       equal(0, res.status);
-      ok(res.stdout.includes('41.2'), `expected 41.2 in output, got:\n${res.stdout}`);
+      ok(res.stdout.includes('42'), `expected 42 in output, got:\n${res.stdout}`);
     });
 
     it('an unknown command exits nonzero with an invalid-argument message', () => {
@@ -102,7 +102,7 @@ describe('CLI launcher (port-authored, mirrors shen-go main_test)', function () 
     it('exits cleanly after stdin EOF instead of looping on "empty stream"', () => {
       const res = runCLI(['repl'], '(version)\n');
       equal(0, res.status, `repl should exit 0 on stdin EOF; stderr:\n${res.stderr}`);
-      ok(res.stdout.includes('41.2'), `expected version evaluated, got:\n${res.stdout}`);
+      ok(res.stdout.includes('42'), `expected version evaluated, got:\n${res.stdout}`);
       // The hallmark of the hang regression: a flood of "empty stream" errors.
       const emptyStreamHits = (res.stdout.match(/empty stream/g) || []).length;
       ok(emptyStreamHits === 0, `repl leaked "empty stream" errors on EOF (count=${emptyStreamHits})`);

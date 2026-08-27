@@ -1,5 +1,5 @@
-manifest-version=3
-kernel-version=41.2-s41r.20260711
+manifest-version=2
+kernel-version=42
 kernel=kernel.kl
 init=shen.initialise
 user=metaeval.kl
