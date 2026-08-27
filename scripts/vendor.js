@@ -1,6 +1,6 @@
 // Re-vendors the kernel/ tree from the community ShenOSKernel GitHub release.
 //
-// NOTE: as of the S41.2 (2026-07-11) refresh this script no longer matches the
+// NOTE: this script tracks the community ShenOSKernel release lineage.
 // vendored kernel lineage. The refreshed kernel comes from Mark Tarver's
 // re-upload (canonical mirror pyrex41/shen-s41.1, tag s41.2-pristine-20260711;
 // upstream https://www.shenlanguage.org/Download/S41.2.zip), which expands to a
@@ -26,7 +26,7 @@ import { formatGrid } from './utils.js';
 
 const { kernelVersion, kernelPath, klPath } = config;
 
-const archiveSha256 = '49f1b85d02348d9b3ebc461570c5c56cc066270ab81e35d5257625fb9d17fe82';
+const archiveSha256 = '32e86f58a1f6bbc111712a777a04a592c474e5cd05c2db7be0125f25ba8f8e35';
 const folderName  = `ShenOSKernel-${kernelVersion}`;
 const archiveName = `${folderName}.zip`;
 const archiveUrl  = `https://github.com/Shen-Language/shen-sources/releases/download/shen-${kernelVersion}/${archiveName}`;

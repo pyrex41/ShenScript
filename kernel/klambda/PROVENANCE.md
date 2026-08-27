@@ -1,18 +1,14 @@
 # Provenance
 
-The kernel KLambda under this directory tracks **Mark Tarver's S41.2 refresh**,
-re-uploaded on **2026-07-11**. Note that upstream reused the `41.2` version
-number for a **restructured kernel** with different lineage from the community
-ShenOSKernel-41.2 this checkout previously built against, so treat the string
-"41.2" as ambiguous: here it means **S41.2 (2026-07-11 refresh)**.
+The kernel KLambda under this directory tracks **Shen 42.0** (Mark Tarver's
+community release, tag `shen-42.0`, commit `dba654f185516d758bc0f85539d1cb1ef44a1305`).
 
 ## Canonical source
 
-- Mirror repo: `pyrex41/shen-s41.1` (private), the designated canonical mirror
-  of Tarver's uploads.
-- Tag: `s41.2-pristine-20260711`
-- Commit: `11fc51b`
-- Path in the tag: `KLambda/*.kl`
+- Repository: `Shen-Language/shen-sources`
+- Release archive: `ShenOSKernel-42.0.tar.gz`
+- Archive SHA-256: `32e86f58a1f6bbc111712a777a04a592c474e5cd05c2db7be0125f25ba8f8e35`
+- Path in the archive: `klambda/*.kl`
 
 The 15 kernel `.kl` files listed in `SHA256SUMS` (all except `stlib.kl` and the
 `extension-*.kl`, see below) are **byte-identical** to `KLambda/*.kl` at that
