@@ -1,10 +1,10 @@
 export default {
-  kernelVersion: '41.2',
+  kernelVersion: '42',
   kernelPath:    'kernel',
   testsPath:     'kernel/tests',
   klPath:        'kernel/klambda',
   klExt:         '.kl',
-  // Kernel modules for the S41.2 refresh, split into two boot phases around the
+  // Kernel modules for the Shen 42.0 pristine kernel, split into two boot phases around the
   // point where ShenScript's native overrides are installed (scripts/render.js).
   //
   // Upstream boot order (Sources/make.shen) is: yacc core load prolog reader

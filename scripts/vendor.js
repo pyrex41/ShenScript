@@ -26,7 +26,7 @@ import { formatGrid } from './utils.js';
 
 const { kernelVersion, kernelPath, klPath } = config;
 
-const archiveSha256 = '49f1b85d02348d9b3ebc461570c5c56cc066270ab81e35d5257625fb9d17fe82';
+const archiveSha256 = '32e86f58a1f6bbc111712a777a04a592c474e5cd05c2db7be0125f25ba8f8e35';
 const folderName  = `ShenOSKernel-${kernelVersion}`;
 const archiveName = `${folderName}.zip`;
 const archiveUrl  = `https://github.com/Shen-Language/shen-sources/releases/download/shen-${kernelVersion}/${archiveName}`;
