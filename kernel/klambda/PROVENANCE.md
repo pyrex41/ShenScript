@@ -1,97 +1,99 @@
 # Provenance
 
-The kernel KLambda under this directory tracks **Mark Tarver's pristine S42**,
-mirror commit `28825a211f5b2fb952510dab17267ca8eb9594a0`, tag
-`s42-pristine-20260825`.
+The `kernel/` tree (including this directory) is vendored **byte-for-byte** from
+the community **ShenOSKernel 42.2** release, the kernel that upstream
+[shen-scheme 0.50](https://github.com/tizoc/shen-scheme/tree/v0.50) ships:
 
-## Canonical source
+- Repository: [`Shen-Language/shen-sources`](https://github.com/Shen-Language/shen-sources)
+- Tag: `shen-42.2`, commit `73507e069fe147aefb728d632c4ce40bc6a7b314`
+  (2026-10-01)
+- Release asset: `ShenOSKernel-42.2.tar.gz`
+  (<https://github.com/Shen-Language/shen-sources/releases/download/shen-42.2/ShenOSKernel-42.2.tar.gz>)
+- SHA-256: `1d02273003654d34ec020ae67cb214ecec410dee3350419ff807d82b652678d8`
+  (the checksum pinned in shen-scheme 0.50's Makefile)
+- `(version)` is `"42.2"`, set by `init.kl`'s `shen.initialise-environment`.
 
-- Mirror repo: `pyrex41/shen-upstream` (private), the designated canonical mirror
-  of Tarver's uploads.
-- Tag: `s42-pristine-20260825`
-- Commit: `28825a2`
-- Path in the tag: `KLambda/*.kl`
+Every file under `kernel/` is identical to the corresponding file in that
+archive, with exactly two additions: this `PROVENANCE.md` and `SHA256SUMS`
+(checksums of every `klambda/*.kl`). This was verified by downloading the
+archive, checking its SHA-256, extracting it and running a recursive `diff`
+against `kernel/` (no differences). The `.kl` files are release build outputs
+(not tracked in the git tag); `sources/*.shen` are byte-identical to
+`sources/` at the tag. `scripts/vendor.js` (`npm run vendor-kernel`) repeats
+the download, checksum and replacement.
 
-The 15 kernel `.kl` files listed in `SHA256SUMS` (all except `stlib.kl` and the
-`extension-*.kl`, see below) are **byte-identical** to `KLambda/*.kl` at that
-tag. Verified by `git show <tag>:KLambda/<f>.kl | cmp -` against each file.
+## Lineage choice
 
-### Secondary source (the mirror's own upstream)
+Through August 2026 ShenScript vendored Mark Tarver's pristine **S42** kernel
+(see History below). 42.1 and 42.2 are releases of the **community**
+`shen-sources` line, which differs structurally from Tarver's kernel. Per
+pyrex41/ShenScript#14 (umbrella pyrex41/bifrost#26, pyrex41/yggdrasil#32),
+every port driven by Bifrost and Yggdrasil adopts **option (a): ShenOSKernel
+42.2 wholesale**, so that cross-port agreement runs on the kernel shen-scheme
+0.50 ships. This undoes the Tarver-lineage loader work:
 
-- URL: <https://www.shenlanguage.org/Download/S42.zip>
-- Archive: mirror commit `28825a2`
+- Every `.kl` module is a plain list of `(defun ...)` forms. All global state is
+  set up by `init.kl`'s `(shen.initialise)`, which ShenScript calls once, after
+  defining every module and installing its native overrides
+  (`scripts/render.js`, `scripts/config.js`).
+- The property store is `dict.kl`'s `shen.dict` again (`*property-vector*` is
+  `(shen.dict 20000)`), and lambda forms live under the `shen.lambda-form`
+  property (no `shen.*lambdatable*`). `lib/overrides.js` restores the native
+  Map-backed `put` / `shen.dict*` layer ShenScript used on ShenOSKernel 41.x, and
+  drops the S42-only `shen.set-lambda-form-entry` shim that wrote into
+  `shen.*lambdatable*` (under 42.2 it would have written to a table nothing
+  reads; the kernel's own definition is now used).
+- The standard library is the release's precompiled `stlib.kl`, loaded after the
+  kernel and initialised with `(stlib.initialise)` as `doc/port-upgrades.md`
+  (41.1) requires. The from-source `scripts/render-stlib.js` generator is gone.
 
-The archive expands to a different tree layout than the community release
-(`KLambda/`, `Sources/`, `Lib/`, `Primitives/`, `Test Programs/`), which is why
-`scripts/vendor.js` — written for the community `ShenOSKernel-<v>.zip` GitHub
-release — cannot re-vendor this lineage as-is (see the note in that file).
+## Extensions
 
-## What the refresh changed vs community ShenOSKernel-41.2
+`extension-features.kl`, `extension-expand-dynamic.kl` and
+`extension-launcher.kl` are booted (the launcher drives `bin/shen.js`).
+`extension-programmable-pattern-matching.kl`, `extension-namespaces.kl` and
+`extension-type-annotations.kl` are opt-in and not booted; their `.shen`
+sources are exercised by `npm run test-kernel-extensions`
+(`kernel/tests/extensions/`), which passes on 42.2 (the pattern-matching hooks
+the Tarver kernel had removed are back).
 
-Kernel module set (15 files): `backend core declarations load macros prolog
-reader sequent sys t-star toplevel track types writer yacc`.
+## 42.1 / 42.2 port audit (`doc/port-upgrades.md`)
 
-- **New:** `backend.kl` — a `cl.*` KLambda->Common-Lisp backend. Irrelevant to
-  the JS runtime but part of upstream's boot list; it defines only `cl.*`
-  functions (no top-level forms) so it is harmless to render and include.
-- **Removed:** `compiler.kl` (a shen-cl CL artifact, never in the ShenOS
-  release), `dict.kl` (the dict layer is gone; `*property-vector*` is now a
-  plain `(vector 20000)` and `put`/`get`/`unput` hash into it via the pointer
-  functions `shen.change-pointer-value` / `shen.remove-pointer` in `sys.kl`),
-  and `init.kl` (`shen.initialise` no longer exists; environment setup is now
-  top-level forms in `declarations.kl`, and type signatures are established by
-  ~160 top-level `(declare ...)` forms in `types.kl`).
-- `hush` / `input+` and all 16 `dict.kl` functions are gone; `shen.hush`,
-  `shen.input-h+` / `shen.process-input+`, `shen.initialise-lambda-tables`
-  (lambda **table**, replacing the lambda-**form** machinery), pointer
-  functions and others are new.
-
-## ShenScript-specific vendored files (NOT from the upstream kernel)
-
-These are carried by ShenScript and are **not** part of Tarver's refresh.
-`stlib.kl` is generated (see below); the `extension-*.kl` are listed in
-`SHA256SUMS` but are not byte-identical to any upstream S41.2 file:
-
-- **`stlib.kl`** — **generated, not vendored** (and gitignored). It is built from
-  the Shen standard-library **sources** under `kernel/lib/stlib/` by
-  `scripts/render-stlib.js` (`npm run render-stlib`, run first by
-  `npm run build-kernel`). Those sources are vendored from the canonical mirror
-  `pyrex41/shen-upstream`, tag `s41.2-pristine-20260711`, `Lib/StLib` — Tarver's
-  refresh externalises the standard library to these sources (loaded and
-  type-checked at install time via `install.shen`) and ships no precompiled
-  `stlib.kl`. The generator renders a stlib-less kernel, boots it (so the native
-  synchronous `@p` / `shen.pvar?` the type engine needs are installed before any
-  source is type-checked), runs `install.shen` through the kernel's own `load`
-  while intercepting `eval-kl` to capture the compiled `defun`s, then appends
-  `update-lambda-table` calls registering each exported function's arity and
-  lambda-table entry. That registration is what the **retired** community
-  precompiled `stlib.kl` (348 pure defuns) omitted, which is why it left
-  `(arity filter)` = -1 and `(fn filter)` undefined; the from-source build fixes
-  that. `stlib.kl` is therefore no longer in `SHA256SUMS` (it is generated, and
-  its gensym numbering is not stable across generations).
-- **`extension-features.kl`, `extension-expand-dynamic.kl`,
-  `extension-launcher.kl`** — community extensions ShenScript boots (the
-  launcher drives the CLI and Yggdrasil stage-1). They were compiled against the
-  pre-refresh lambda-form API; `lib/overrides.js` provides a
-  `shen.set-lambda-form-entry` compatibility shim that writes into the refresh's
-  `shen.*lambdatable*` so they keep working.
-- **`extension-programmable-pattern-matching.kl`** — opt-in, not booted. It is
-  **inert on this lineage**: the refresh removed the `shen.custom-pattern-compiler`
-  / `shen.custom-pattern-reducer` hooks from the pattern compiler (nothing in the
-  kernel reads `shen.*custom-pattern-compiler*` anymore), so custom patterns fall
-  through to their default rule. `test/kernel/test.extensions.js` detects the
-  missing hook and skips rather than fails.
-
-## Boot order
-
-ShenScript renders all modules into one image and evaluates their top-level
-forms in order, so it needs both define-before-use and its native overrides
-installed before any top-level form that depends on them. See the extended note
-in `scripts/config.js`: kernel defun modules boot first, then `overrides($)`,
-then `declarations` (init forms) and `types` (declares), then the extensions and
-`stlib`.
+- **42.0 `update-lambda-table`:** ShenScript caches no callable forms; `fn`,
+  partial and dynamic application go through the kernel's `shen.lambda-form`
+  property, which `update-lambda-table` unputs for zero/unknown arity.
+  `test/kernel/test.extensions.js` checks this.
+- **42.1 source-form handlers:** ShenScript overrides `macroexpand` natively. The
+  override now mirrors `shen.macroexpand-h` / `shen.source-macro-walk`: a
+  subform whose head has a handler in `shen.*source-form-handlers*` is neither
+  descended into nor passed to a macro. The reader (`read`, `lineread`,
+  `read-from-string`, `shen.try-parse`, `shen.process-sexprs`) is not
+  overridden, so the 42.1 parse-then-expand order and EOF-without-newline
+  handling are the kernel's own; the extension suite's source-forms tests pass.
+- **42.2 namespaces:** the bundled `extension-namespaces.kl` is the release's
+  regenerated one.
 
 ## Verification
 
 Run `node scripts/verify-kernel.js` to check every `.kl` file in this directory
 against `SHA256SUMS`.
+
+## History: Tarver S42 lineage (superseded)
+
+Before 42.2, the kernel KLambda tracked **Mark Tarver's pristine S42**, mirror
+commit `28825a211f5b2fb952510dab17267ca8eb9594a0`, tag `s42-pristine-20260825`
+(canonical mirror `pyrex41/shen-upstream`, `KLambda/*.kl`; upstream
+<https://www.shenlanguage.org/Download/S42.zip>), and before that Tarver's S41.2
+refresh (tag `s41.2-pristine-20260711`). That lineage reused the community
+version numbers but differed structurally: no `dict.kl` (a plain
+`(vector 20000)` property store hashed via `shen.change-pointer-value` /
+`shen.remove-pointer`), no `init.kl` / `shen.initialise` (initialisation as
+load-order-dependent top-level forms in `declarations.kl` and ~160 `(declare
+...)` forms in `types.kl`, which forced ShenScript to boot those modules after
+its overrides), a `cl.*` `backend.kl`, `shen.*lambdatable*` instead of
+`shen.lambda-form`, no custom-pattern hooks, and no precompiled `stlib.kl` (it
+was generated from `Lib/StLib` sources by `scripts/render-stlib.js`). Before the
+Tarver lineage, ShenScript vendored the community ShenOSKernel 41.2 release
+(`ShenOSKernel-41.2.zip`, SHA-256
+`49f1b85d02348d9b3ebc461570c5c56cc066270ab81e35d5257625fb9d17fe82`) plus a
+shen-cl-generated `compiler.kl`, which 42.2 does not need.
