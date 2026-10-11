@@ -1,37 +1,37 @@
 import fs from 'node:fs';
-import { parseKernel, parseKernelPostOverride } from './parser.js';
+import { parseKernel } from './parser.js';
+import config from './config.js';
 import backend from '../lib/backend.js';
 import {
-  Arrow, Block, Call, Const, ExportDefault, Id, ImportDefault, Let, Program, Return,
+  Arrow, Block, Call, Const, ExportDefault, Id, ImportDefault, Let, Program, Return, Statement,
   generate
 } from '../lib/ast.js';
 import { formatDuration, formatGrid, measure } from './utils.js';
 
 console.log('- parsing kernel...');
-const measureParse = measure(() => ({
-  pre:  parseKernel(),
-  post: parseKernelPostOverride()
-}));
+const measureParse = measure(parseKernel);
 console.log(`  parsed in ${formatDuration(measureParse.duration)}`);
 
 console.log(`- creating backend...`);
 const measureBackend = measure(() => backend());
-const { assemble, construct, isArray } = measureBackend.result;
+const { assemble, construct, isArray, symbolOf } = measureBackend.result;
 console.log(`  created in ${formatDuration(measureBackend.duration)}`);
 
 console.log('- rendering kernel...');
 const measureRender = measure(() => {
   const body = assemble(
     Block,
-    // Boot the kernel modules, install ShenScript's native overrides, then boot
-    // the modules whose top-level forms need those overrides: declarations' init
-    // forms (property vector, arity/lambda tables, external symbols) and types'
-    // 161 (declare ...) forms, which drive the prolog type engine and so need the
-    // synchronous native @p / shen.pvar?. This mirrors 41.1's sequence, where the
-    // equivalent setup ran in shen.initialise after overrides. See scripts/config.js.
-    ...measureParse.result.pre.filter(isArray).map(construct),
+    // Define every kernel module (defuns only), install ShenScript's native
+    // overrides, then run the kernel's own initialisation: init.kl's
+    // (shen.initialise) builds the shen.dict property store, arity table,
+    // lambda forms and type signatures, and (stlib.initialise) registers the
+    // precompiled standard library. Initialisation must run after the
+    // overrides: the type engine needs the synchronous native @p / shen.pvar?,
+    // and the property store must be built by the same put/shen.dict* that
+    // later read it. See scripts/config.js.
+    ...measureParse.result.filter(isArray).map(construct),
     Call(Id('overrides'), [Id('$')]),
-    ...measureParse.result.post.filter(isArray).map(construct));
+    ...config.initForms.map(f => assemble(Statement, construct([symbolOf(f)]))));
   return generate(
     Program([
       ImportDefault(Id('overrides'), './overrides.js'),

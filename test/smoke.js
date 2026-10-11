@@ -12,8 +12,8 @@ const version = $.valueOf('*version*');
 const implementation = $.valueOf('*implementation*');
 const release = $.valueOf('*release*');
 
-if (version !== '42') {
-  console.error(`expected *version* 42, got ${version}`);
+if (version !== '42.2') {
+  console.error(`expected *version* 42.2, got ${version}`);
   process.exit(1);
 }
 

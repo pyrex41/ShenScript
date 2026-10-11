@@ -49,37 +49,30 @@ const OutStream = class {
   // reports pass/fail counts instead of aborting.
   defun('y-or-n?', _ => s`true`);
 
-  // Shen's S42 core resolves `fn` through shen.*lambdatable*. The optional
-  // extensions call set-lambda-form-entry, so verify our adapter populates
-  // that table rather than the obsolete shen.lambda-form property.
+  // ShenOSKernel 42.2 resolves `fn` through the shen.lambda-form property in
+  // *property-vector* (a shen.dict, natively a Map here; see lib/overrides.js).
+  // shen.set-lambda-form-entry must populate that property, and (42.0)
+  // update-lambda-table must invalidate the cached callable form when a
+  // function is redefined with zero arity.
   defun('extension-regression', x => x);
   await evalKl([s`shen.set-lambda-form-entry`,
     [s`cons`, s`extension-regression`, [s`lambda`, s`X`, s`X`]]]);
   const extensionFn = await evalKl([s`fn`, s`extension-regression`]);
   const extensionResult = await extensionFn(s`ok`);
   if (extensionResult !== s`ok`) {
-    throw new Error('set-lambda-form-entry did not register fn in S42 table');
+    throw new Error('set-lambda-form-entry did not register fn in the shen.lambda-form property');
   }
-
-  // The only suite here exercises the opt-in programmable-pattern-matching
-  // extension, which plugs into the kernel's shen.custom-pattern-compiler /
-  // shen.custom-pattern-reducer hooks. Tarver's S41.2 refresh (2026-07-11)
-  // removed those hooks from the pattern compiler entirely -- nothing in the
-  // kernel reads shen.*custom-pattern-compiler* anymore -- so the extension is
-  // inert on this lineage: custom patterns fall through to their default rule.
-  // There is no ShenScript-side fix short of re-patching the vendored kernel.
-  // Skip (rather than fail) when the hook is absent, the standard treatment for
-  // an optional feature the backend cannot support. See kernel/klambda/PROVENANCE.md.
-  const hookDefined = (() => {
-    const cell = $.c('shen.custom-pattern-compiler');
-    return !!(cell && cell.f && cell.f.arity !== undefined);
-  })();
-  if (!hookDefined) {
-    console.log('- SKIP: programmable-pattern-matching unsupported on this kernel');
-    console.log('  (S41.2 refresh removed the shen.custom-pattern-compiler/-reducer hooks)');
-    console.log();
-    console.log(formatGrid(['Extension Tests', 'skipped (hooks removed upstream)', '-']));
-    return;
+  // Re-registering it as zero-place must drop the stale callable form, so fn
+  // calls the new definition instead of returning the old lambda.
+  await evalKl([s`update-lambda-table`, s`extension-regression`, 0]);
+  let staleForm = true;
+  try {
+    await evalKl([s`get`, s`extension-regression`, s`shen.lambda-form`, [s`value`, s`*property-vector*`]]);
+  } catch (e) {
+    staleForm = false;
+  }
+  if (staleForm || await evalKl([s`arity`, s`extension-regression`]) !== 0) {
+    throw new Error('update-lambda-table did not invalidate the lambda form on a zero-arity redefinition (42.0)');
   }
 
   console.log('- running extension test suite...');
