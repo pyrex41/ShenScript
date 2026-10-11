@@ -47,12 +47,10 @@ import { stdStreamOptions } from '../lib/streams.node.js';
         const message = e && typeof e.message === 'string' ? e.message : String(e);
         // EOF on a closed stdin surfaces as the kernel's "empty stream" error.
         // Anything else is a genuine user error: print it and keep looping.
-        // The S41.2 refresh dropped the port-overridable shen.toplevel-display-
-        // exception hook; shen.loop (toplevel.kl) now prints the error inline as
-        // (pr (error-to-string E) (stoutput)) then (nl 0). Mirror that here.
+        // Report it through the kernel's shen.toplevel-display-exception, as
+        // shen.loop (toplevel.kl) does.
         if (!(stinput.eof && message === 'error: empty stream')) {
-          await caller('pr')(await caller('error-to-string')(e), await caller('stoutput')());
-          await caller('nl')(0);
+          await caller('shen.toplevel-display-exception')(e);
         }
       }
       if (stinput.eof) {

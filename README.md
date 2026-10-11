@@ -1,4 +1,4 @@
-[![Shen Version](https://img.shields.io/badge/shen-42.0-blue.svg)](https://github.com/Shen-Language)
+[![Shen Version](https://img.shields.io/badge/shen-42.2-blue.svg)](https://github.com/Shen-Language)
 [![Build Status](https://travis-ci.org/rkoeninger/ShenScript.svg?branch=master)](https://travis-ci.org/rkoeninger/ShenScript)
 [![Docs Status](https://readthedocs.org/projects/shenscript/badge/?version=latest)](https://shenscript.readthedocs.io/en/latest/?badge=latest)
 [![npm](https://img.shields.io/npm/v/shen-script.svg)](https://www.npmjs.com/package/shen-script)
@@ -38,18 +38,17 @@ or as a git dependency (`npm install github:pyrex41/ShenScript`), which also tri
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel KLambda is vendored under `kernel/` from Mark Tarver's **S41.2 refresh** (2026-07-11 re-upload; canonical mirror `pyrex41/shen-s41.1`, tag `s41.2-pristine-20260711`) — a restructured kernel that reuses the `41.2` version number but is a different lineage from the community shen-sources 41.2. See `kernel/klambda/PROVENANCE.md` for the full delta and the ShenScript-specific vendored files. The standard library is built from its Shen sources under `kernel/lib/stlib/` (Tarver's refresh ships no precompiled `stlib.kl`); run `npm run build-kernel` (which runs `render-stlib` then `render-kernel`) for the full build from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 42.2** release (`Shen-Language/shen-sources`, tag `shen-42.2`; the kernel shen-scheme 0.50 ships), including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
 | `test-backend`           | Runs `mocha` tests for the basic environment and compiler.                                              |
 | `verify-kernel`          | Checks the vendored kernel sources against `kernel/klambda/SHA256SUMS`.                                 |
-| `vendor-kernel`          | Re-downloads the kernel release archive and refreshes `kernel/` (preserves `compiler.kl`, provenance).  |
-| `render-stlib`           | Compiles the Shen standard library from source (`kernel/lib/stlib/`) to the generated `kernel/klambda/stlib.kl`. |
+| `vendor-kernel`          | Re-downloads the kernel release archive, checks its SHA-256 and refreshes `kernel/` (preserves provenance). |
 | `render-kernel`          | Translates the kernel sources to JavaScript at `lib/kernel.js`.                                         |
-| `build-kernel`           | Runs `render-stlib` then `render-kernel` — the full build from a clean checkout.                        |
+| `build-kernel`           | Runs `render-kernel` — the full build from a clean checkout.                                             |
 | `test-kernel`            | Runs the certification test suite that comes with the Shen kernel.                                      |
-| `test-kernel-extensions` | Runs the kernel's extension test suite (programmable pattern matching).                                 |
+| `test-kernel-extensions` | Runs the kernel's extension test suite (features, pattern matching, type annotations, source forms, namespaces). |
 | `test-frontend`          | Runs `mocha` tests for helper and interop functions.                                                    |
 | `bundle-dev`    | Applies babel transforms and webpack's into web-deployable bundle.                                                |
 | `bundle`        | Builds bundle in production mode.                                                                                 |

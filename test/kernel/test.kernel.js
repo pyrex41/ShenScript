@@ -73,7 +73,7 @@ const formatResult = (failures, ignored) =>
   const passed = final(/passed \.\.\. (\d+)/g);
   const failures = final(/failed \.\.\. (\d+)/g);
   const ignored = 0;
-  const expected = 134;
+  const expected = 143;
   console.log(`  passed: ${passed} (expected ${expected}), failed: ${failures}`);
   console.log(`  ran in ${formatDuration(measureRun.duration)}, ${formatResult(failures, ignored)}`);
 

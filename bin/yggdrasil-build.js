@@ -4,7 +4,7 @@
 //   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
-// kernel (kernel.kl, Shen 42.0 defuns in load order), the user
+// kernel (kernel.kl, Shen 42.x defuns in load order), the user
 // program as KL (one or more user= files), and ratatoskr.manifest.txt.
 // Every KL form is compiled ahead of time with ShenScript's own compiler
 // (lib/backend.js) and emitted as ONE runnable ES module <out.js>:
@@ -31,7 +31,7 @@
 //
 // Builder contract (ratatoskr.shen): load kernel.kl's defuns, call the
 // manifest's init function ((shen.initialise) does all global
-// initialisation in 41.2), then run each user file's forms in source
+// initialisation in ShenOSKernel 42.2), then run each user file's forms in source
 // order. Overrides are installed between the kernel forms and the init
 // call, mirroring scripts/render.js - the compiler's sync-call detection
 // assumes override names behave like primitives, so the overridden
@@ -44,7 +44,7 @@ import backend from '../lib/backend.js';
 import overrides from '../lib/overrides.js';
 import { parseFile } from '../scripts/parser.js';
 import {
-  Arrow, Block, Call, Const, Id, Let, Program, Return, Statement, generate
+  Arrow, Block, Call, Const, Id, Let, Literal, NewObj, Program, Property, Return, Statement, generate
 } from '../lib/ast.js';
 
 const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web]';
@@ -106,7 +106,7 @@ if (manifest.user.length === 0) {
   console.error('manifest lists no user= files');
   process.exit(1);
 }
-if (manifest['kernel-version'] !== '42' && !manifest['kernel-version'].startsWith('42-')) {
+if (!/^42(\.|-|$)/.test(manifest['kernel-version'] || '')) {
   console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder targets 42`);
 }
 if (manifest['manifest-version'] !== '2') {
@@ -154,18 +154,27 @@ const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
 
 // Call the manifest's init function (e.g. shen.initialise) only if the shaken
-// kernel actually defines it. The S41.2 refresh dropped shen.initialise and
-// initialises via top-level forms in the kernel itself, so a shake against that
-// lineage carries its initialisation inline and has no init function to call;
-// emitting an unconditional (shen.initialise) would fault at boot.
+// kernel actually defines it. ShenOSKernel 42.2 (community lineage) shakes
+// define shen.initialise, from init.kl or synthesised by the shaker; a shake of
+// a kernel that initialises via top-level forms has no init function, and an
+// unconditional (shen.initialise) would fault at boot.
 const isSym = (x, name) => typeof x === 'symbol' && Symbol.keyFor(x) === name;
-const initDefined = manifest.init && kernelForms.some(f =>
-  isArray(f) && f.length >= 2 && isSym(f[0], 'defun') && isSym(f[1], manifest.init));
+const definesFn = name => kernelForms.some(f =>
+  isArray(f) && f.length >= 2 && isSym(f[0], 'defun') && isSym(f[1], name));
+const initDefined = manifest.init && definesFn(manifest.init);
+
+// ShenOSKernel 42.2 keeps properties in a shen.dict (dict.kl), which
+// lib/overrides.js replaces with a native Map-backed store, overriding put.
+// A shake of the pre-42.2 Tarver S42 kernel (Yggdrasil still vendors S42.0)
+// instead keeps a plain (vector 20000) managed by its own put/get, so the
+// native dict layer must stay out of the way: install it only when the shaken
+// kernel defines shen.dict or does not define put at all.
+const nativeDict = definesFn('shen.dict') || !definesFn('put');
 
 const body = assemble(
   Block,
   ...kernelForms.filter(isArray).map(construct),
-  Call(Id('overrides'), [Id('$')]),
+  Call(Id('overrides'), [Id('$'), NewObj([Property(Id('nativeDict'), Literal(nativeDict))])]),
   ...(initDefined ? [assemble(Statement, construct([s`${manifest.init}`]))] : []),
   ...userForms.flatMap(({ forms }) => forms.filter(isArray).map(construct)));
 
