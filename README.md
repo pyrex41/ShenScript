@@ -96,7 +96,7 @@ Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.14,
 
 | Suite | Node | Deno | Bun |
 |:--|--:|--:|--:|
-| `test-kernel` (143 kernel certification tests) | measured after the 43.1 upgrade | measured after the 43.1 upgrade | measured after the 43.1 upgrade |
+| `test-kernel` (154 kernel certification tests) | measured after the 43.1 upgrade | measured after the 43.1 upgrade | measured after the 43.1 upgrade |
 | `test-kernel-extensions` (8 tests) | 0.4 s | 0.5 s | 0.7 s |
 
 Before those optimizations the kernel suite ran 19.0 s / 18.4 s / 50.1 s (Bun 1.3.6) on the same machine — roughly 2× faster on Node/Deno and 2.5× on Bun. For reference, shen-lua under LuaJIT runs the equivalent certification suite in ~6 s.
