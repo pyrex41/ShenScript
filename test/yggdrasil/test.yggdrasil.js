@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -52,6 +52,44 @@ for (const { name, expected, linked } of fixtures) {
     console.error(`  FAIL - expected ${JSON.stringify(expected)}, got ${JSON.stringify(output)}`);
     failed = true;
   }
+}
+
+// ShenOSKernel 43.1 emits manifest version 4. Keep the stage-2 builder's
+// compatibility contract explicit: current 43.1 manifests are accepted
+// without a stale-version warning, while unrelated versions still warn.
+{
+  const source = path.join(root, 'test/yggdrasil/fixtures/fib');
+  const compatDir = fs.mkdtempSync(path.join(os.tmpdir(), 'yggdrasil-manifest-'));
+  fs.cpSync(source, compatDir, { recursive: true });
+  const manifestPath = path.join(compatDir, 'yggdrasil.manifest.txt');
+  const manifest43 = fs.readFileSync(manifestPath, 'utf8')
+    .replace('manifest-version=2', 'manifest-version=4')
+    .replace('kernel-version=42', 'kernel-version=43.1');
+  fs.writeFileSync(manifestPath, manifest43);
+  const compatOut = path.join(outDir, 'manifest-43.js');
+  const compat = spawnSync(process.execPath,
+    [path.join(root, 'bin/yggdrasil-build.js'), compatDir, compatOut],
+    { encoding: 'utf8' });
+  if (compat.status !== 0 || compat.stderr || compat.stdout.length === 0) {
+    console.error(`  FAIL - Shen 43.1 manifest emitted a compatibility warning or failed: ${JSON.stringify(compat.stderr)}`);
+    failed = true;
+  } else {
+    console.log('  ok - Shen 43.1 / manifest 4 accepted without compatibility warnings');
+  }
+
+  const staleManifest = manifest43.replace('manifest-version=4', 'manifest-version=9').replace('kernel-version=43.1', 'kernel-version=99');
+  fs.writeFileSync(manifestPath, staleManifest);
+  const staleOut = path.join(outDir, 'manifest-stale.js');
+  const stale = spawnSync(process.execPath,
+    [path.join(root, 'bin/yggdrasil-build.js'), compatDir, staleOut],
+    { encoding: 'utf8' });
+  if (!stale.stderr.includes('kernel-version') || !stale.stderr.includes('manifest-version')) {
+    console.error(`  FAIL - unsupported manifest versions did not warn: ${JSON.stringify(stale.stderr)}`);
+    failed = true;
+  } else {
+    console.log('  ok - unsupported manifest versions still warn');
+  }
+  fs.rmSync(compatDir, { recursive: true, force: true });
 }
 
 // --- --web target: a browser-safe module that boots and exports the env ---

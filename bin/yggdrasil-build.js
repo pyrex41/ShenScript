@@ -4,7 +4,7 @@
 //   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
-// kernel (kernel.kl, Shen 42.x defuns in load order), the user
+// kernel (kernel.kl, Shen 42.x or 43.1 defuns in load order), the user
 // program as KL (one or more user= files), and ratatoskr.manifest.txt.
 // Every KL form is compiled ahead of time with ShenScript's own compiler
 // (lib/backend.js) and emitted as ONE runnable ES module <out.js>:
@@ -106,11 +106,11 @@ if (manifest.user.length === 0) {
   console.error('manifest lists no user= files');
   process.exit(1);
 }
-if (!/^42(\.|-|$)/.test(manifest['kernel-version'] || '')) {
-  console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder targets 42`);
+if (!/^(?:42(?:\.|-|$)|43\.1(?:\.|-|$))/.test(manifest['kernel-version'] || '')) {
+  console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder supports 42 and 43.1`);
 }
-if (manifest['manifest-version'] !== '2') {
-  console.warn(`warning: manifest-version is ${manifest['manifest-version']}, this builder understands version 2`);
+if (!['2', '4'].includes(manifest['manifest-version'])) {
+  console.warn(`warning: manifest-version is ${manifest['manifest-version']}, this builder understands versions 2 and 4`);
 }
 
 const needsEval = manifest['needs-eval'] === 'true';
@@ -154,7 +154,7 @@ const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
 
 // Call the manifest's init function (e.g. shen.initialise) only if the shaken
-// kernel actually defines it. ShenOSKernel 42.2 (community lineage) shakes
+// kernel actually defines it. ShenOSKernel 42.2/43.1 (community lineage) shakes
 // define shen.initialise, from init.kl or synthesised by the shaker; a shake of
 // a kernel that initialises via top-level forms has no init function, and an
 // unconditional (shen.initialise) would fault at boot.
