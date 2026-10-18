@@ -13,3 +13,8 @@ Every file under `kernel/` is identical to the release archive, with this
 provenance file and `SHA256SUMS` added for local verification. The port follows
 the 43.1 guide in `doc/port-upgrades.md`: character stream support is exposed
 through public `char-stream?`, `read-unit-string`, and `write-string` names.
+
+The archive contains 23 `klambda/*.kl` modules. The old ShenScript Tarver-line
+backend and its generated Common Lisp compiler are historical port artifacts;
+they were removed before this upgrade and remain available in the pre-42.2 git
+history, not in the 43.1 vendor tree.
