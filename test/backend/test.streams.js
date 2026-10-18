@@ -182,5 +182,18 @@ describe('streams (port-authored regression for 4c03a96)', () => {
         () => { throw new Error('expected rejected character input'); },
         error => equal('character input failed', error.message));
     });
+
+    it('read settles final character-stream input without a trailing newline', async () => {
+      const chars = [...'( + 1 2 )'];
+      const stream = new AsyncCharStream(chars);
+      const options = stdStreamOptions();
+      const baseIsIn = options.isInStream;
+      options.isInStream = x => x instanceof AsyncCharStream || baseIsIn(x);
+      const char$ = await createShen(options);
+      const form = await char$.settle(char$.lookup('read').f(stream));
+      equal(char$.s`+`, form.head);
+      equal(1, form.tail.head);
+      equal(2, form.tail.tail.head);
+    });
   });
 });
