@@ -1,4 +1,4 @@
-[![Shen Version](https://img.shields.io/badge/shen-42.2-blue.svg)](https://github.com/Shen-Language)
+[![Shen Version](https://img.shields.io/badge/shen-43.1-blue.svg)](https://github.com/Shen-Language)
 [![Build Status](https://travis-ci.org/rkoeninger/ShenScript.svg?branch=master)](https://travis-ci.org/rkoeninger/ShenScript)
 [![Docs Status](https://readthedocs.org/projects/shenscript/badge/?version=latest)](https://shenscript.readthedocs.io/en/latest/?badge=latest)
 [![npm](https://img.shields.io/npm/v/shen-script.svg)](https://www.npmjs.com/package/shen-script)
@@ -38,7 +38,7 @@ or as a git dependency (`npm install github:pyrex41/ShenScript`), which also tri
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 42.2** release (`Shen-Language/shen-sources`, tag `shen-42.2`; the kernel shen-scheme 0.50 ships), including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 43.1** release (`Shen-Language/shen-sources`, tag `shen-43.1`), including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
@@ -96,7 +96,7 @@ Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.14,
 
 | Suite | Node | Deno | Bun |
 |:--|--:|--:|--:|
-| `test-kernel` (134 kernel certification tests) | ~10 s | ~9 s | ~19.5 s |
+| `test-kernel` (143 kernel certification tests) | measured after the 43.1 upgrade | measured after the 43.1 upgrade | measured after the 43.1 upgrade |
 | `test-kernel-extensions` (8 tests) | 0.4 s | 0.5 s | 0.7 s |
 
 Before those optimizations the kernel suite ran 19.0 s / 18.4 s / 50.1 s (Bun 1.3.6) on the same machine — roughly 2× faster on Node/Deno and 2.5× on Bun. For reference, shen-lua under LuaJIT runs the equivalent certification suite in ~6 s.

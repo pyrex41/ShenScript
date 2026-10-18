@@ -1,7 +1,7 @@
 // Re-vendors the kernel/ tree from the community ShenOSKernel GitHub release
 // (Shen-Language/shen-sources), the lineage ShenScript tracks since 42.2.
 // Downloads ShenOSKernel-<v>.tar.gz, checks its SHA-256 (the checksum pinned in
-// shen-scheme 0.50's Makefile for 42.2), and replaces kernel/ with the archive
+// the ShenOSKernel 43.1 release, and replaces kernel/ with the archive
 // contents byte-for-byte, preserving only klambda/PROVENANCE.md and
 // klambda/SHA256SUMS. After running, regenerate SHA256SUMS
 // (cd kernel/klambda && sha256sum *.kl > SHA256SUMS) and update PROVENANCE.md
@@ -17,7 +17,7 @@ import { formatGrid } from './utils.js';
 
 const { kernelVersion, kernelPath, klPath } = config;
 
-const archiveSha256 = '1d02273003654d34ec020ae67cb214ecec410dee3350419ff807d82b652678d8';
+const archiveSha256 = '900eedef44f440af78f9395ed06e689ce1604546fc309f5bc7c8bc84cc651920';
 const folderName  = `ShenOSKernel-${kernelVersion}`;
 const archiveName = `${folderName}.tar.gz`;
 const archiveUrl  = `https://github.com/Shen-Language/shen-sources/releases/download/shen-${kernelVersion}/${archiveName}`;

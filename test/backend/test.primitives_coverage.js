@@ -12,8 +12,8 @@
 // Divergences from shen-go noted inline:
 //   - an uninitialized absvector slot reads back as JS null (ShenScript's
 //     empty-list / nil), not shen-go's special `undefined` object.
-//   - shen.char-stinput? is false for ShenScript's FileInStream (byte-based,
-//     no readString), and shen.char-stoutput? is true for FileOutStream
+//   - char-stream? is false for ShenScript's FileInStream (byte-based,
+//     no readString), and true for FileOutStream
 //     (it has writeString). These mirror the stream classes' method shapes.
 import { equal, ok } from 'node:assert';
 import forEach from 'mocha-each';
@@ -140,26 +140,26 @@ describe('primitives coverage (port-authored, mirrors shen-go primitives_coverag
   });
 
   describe('char-stream predicates', () => {
-    // Divergence pinned: FileOutStream has writeString -> char-stoutput? true;
-    // FileInStream is byte-based (no readString) -> char-stinput? false.
-    it('shen.char-stoutput? is true for a (writeString-capable) FileOutStream', async () => {
+    // Divergence pinned: FileOutStream has writeString -> char-stream? true;
+    // FileInStream is byte-based (no readString) -> char-stream? false.
+    it('char-stream? is true for a (writeString-capable) FileOutStream', async () => {
       const p = `${process.cwd()}/.ss-charout-${process.pid}.tmp`;
       const out = new FileOutStream(p);
       try {
-        equal($.s`true`, await $.settle($.lookup('shen.char-stoutput?').f(out)));
+        equal($.s`true`, await $.settle($.lookup('char-stream?').f(out)));
       } finally {
         out.close();
         const fs = await import('node:fs');
         fs.rmSync(p, { force: true });
       }
     });
-    it('shen.char-stinput? is false for a (byte-based) FileInStream', async () => {
+    it('char-stream? is false for a (byte-based) FileInStream', async () => {
       const fs = await import('node:fs');
       const p = `${process.cwd()}/.ss-charin-${process.pid}.tmp`;
       fs.writeFileSync(p, 'x');
       const inn = new FileInStream(p);
       try {
-        equal($.s`false`, await $.settle($.lookup('shen.char-stinput?').f(inn)));
+        equal($.s`false`, await $.settle($.lookup('char-stream?').f(inn)));
       } finally {
         inn.close();
         fs.rmSync(p, { force: true });
