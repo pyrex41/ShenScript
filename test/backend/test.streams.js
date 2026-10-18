@@ -23,6 +23,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createShen } from '../../lib/shen.node.js';
 import { FileInStream, FileOutStream, stdStreamOptions } from '../../lib/streams.node.js';
+import { parseForm } from '../../scripts/parser.js';
 
 // A minimal async input stream with the same contract as NodeInStream
 // (incremental stdin): read() returns a Promise that resolves to the next
@@ -36,6 +37,20 @@ class AsyncByteStream {
   async read() {
     await Promise.resolve(); // force a real microtask hop, like the real stream
     return this.pos >= this.bytes.length ? (this.eof = true, -1) : this.bytes[this.pos++];
+  }
+  close() { return null; }
+}
+
+class AsyncCharStream {
+  constructor(strings, error = null) {
+    this.strings = [...strings];
+    this.error = error;
+  }
+  readString() {
+    return Promise.resolve().then(() => {
+      if (this.error) throw this.error;
+      return this.strings.length > 0 ? this.strings.shift() : '';
+    });
   }
   close() { return null; }
 }
@@ -140,6 +155,32 @@ describe('streams (port-authored regression for 4c03a96)', () => {
       equal(-1, eofByte);
       equal('number', typeof eofByte);
       ok(stream.eof, 'async stream should report eof after a -1 read');
+    });
+
+    it('public read-unit-string suspends a Shen function until character input resolves', async () => {
+      const stream = new AsyncCharStream(['ab']);
+      const options = stdStreamOptions();
+      const baseIsIn = options.isInStream;
+      options.isInStream = x => x instanceof AsyncCharStream || x instanceof AsyncByteStream || baseIsIn(x);
+      options.stinput = stream;
+      const char$ = await createShen(options);
+      await char$.evalKl(parseForm('(defun read-char-plus () (cn (read-unit-string (stinput)) "!"))'));
+      const pending = char$.lookup('read-char-plus').f();
+      ok(pending instanceof Promise, 'character read should suspend the Shen function');
+      equal('ab!', await char$.settle(pending));
+    });
+
+    it('public read-unit-string propagates rejected character input', async () => {
+      const stream = new AsyncCharStream([], new Error('character input failed'));
+      const options = stdStreamOptions();
+      const baseIsIn = options.isInStream;
+      options.isInStream = x => x instanceof AsyncCharStream || baseIsIn(x);
+      options.stinput = stream;
+      const char$ = await createShen(options);
+      await char$.evalKl(parseForm('(defun read-char-error () (read-unit-string (stinput)))'));
+      await char$.settle(char$.lookup('read-char-error').f()).then(
+        () => { throw new Error('expected rejected character input'); },
+        error => equal('character input failed', error.message));
     });
   });
 });
