@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Ratatoskr stage-2 builder for ShenScript.
 //
-//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module]
+//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
 // kernel (kernel.kl, Shen 42.x or 43.1 defuns in load order), the user
@@ -43,19 +43,22 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import backend from '../lib/backend.js';
+import { analyzeAot } from '../lib/aot-analysis.js';
 import overrides from '../lib/overrides.js';
 import { parseFile } from '../scripts/parser.js';
 import {
   Arrow, Block, Call, Const, Id, Let, Literal, NewObj, Program, Property, Return, Statement, generate
 } from '../lib/ast.js';
 
-const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module]';
+const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed]';
 
-const FLAGS = new Set(['--linked', '--web', '--module']);
+const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed']);
 const args = process.argv.slice(2).filter(a => !FLAGS.has(a));
 const linked = process.argv.includes('--linked');
 const web = process.argv.includes('--web');
 const moduleOutput = process.argv.includes('--module');
+const sealed = process.argv.includes('--sealed');
+const analyze = process.argv.includes('--analyze') || sealed;
 
 if (process.argv.includes('-h') || process.argv.includes('--help') || args.length !== 2) {
   console.error(USAGE);
@@ -117,6 +120,10 @@ if (!['2', '4'].includes(manifest['manifest-version'])) {
 }
 
 const needsEval = manifest['needs-eval'] === 'true';
+if (sealed && needsEval) {
+  console.error('--sealed currently requires needs-eval=false in the manifest');
+  process.exit(1);
+}
 if (needsEval && !linked) {
   console.error('needs-eval=true requires the compiler in the output artifact, which only');
   console.error('--linked mode provides. Re-run with --linked.');
@@ -148,13 +155,13 @@ for (const name of manifest.primitive) {
  *  Compile    *
  ***************/
 
-const $ = backend();
-const { assemble, construct, isArray, s } = $;
-
 const parseKl = file => parseFile(fs.readFileSync(path.join(shakenDir, file), 'utf-8'));
 
 const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
+const aot = analyze ? analyzeAot([...kernelForms, ...userForms.flatMap(x => x.forms)], { nativeNames: defined }) : null;
+const $ = backend(sealed ? { aotAnalysis: aot } : {});
+const { assemble, construct, isArray, s } = $;
 
 // Call the manifest's init function (e.g. shen.initialise) only if the shaken
 // kernel actually defines it. ShenOSKernel 42.2/43.1 (community lineage) shakes
@@ -224,14 +231,15 @@ const platform = {
 };
 `;
 
+const sealBoot = sealed ? 'installAotSealing($);' : '';
 const main = moduleOutput ? `
 const $ = runtime({ ...platform, ...stdStreamOptions() });
-await run($);
+${sealed ? sealBoot + '\n' : ''}await run($);
 $.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(cell.f(...args)); };
 export default $;
 ` : `
 const $ = runtime({ ...platform, ...stdStreamOptions() });
-run($).catch(e => {
+${sealed ? sealBoot + '\n' : ''}run($).catch(e => {
   console.error(e && e.message ? e.message : e);
   process.exit(1);
 });
@@ -263,13 +271,15 @@ const $ = runtime({
   stoutput: new WebOutStream(s => console.log(s)),
   sterror:  new WebOutStream(s => console.error(s)),
 });
-await run($);
+${sealed ? sealBoot + '\n' : ''}await run($);
 // The one convenience app code needs beyond the minimal runtime, which already
 // exposes toListTree/toArrayTree/lookup/settle (lib/runtime.js). Mirrors caller
 // in lib/frontend.js.
 $.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(cell.f(...args)); };
 export default $;
 `;
+
+if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, ...aot.report }, null, 2) + '\n');
 
 let artifact;
 
@@ -278,6 +288,7 @@ if (web) {
     header,
     embed('runtime.js', src => src.replace(/^export default/m, 'const runtime =')),
     embed('overrides.js', src => src.replace(/^export default/m, 'const overrides =')),
+    ...(sealed ? [embed('aot-runtime.js', src => src.replace(/^export default/m, 'const installAotSealing ='))] : []),
     webPlatform,
     program,
     webBoot
@@ -288,6 +299,7 @@ if (web) {
     header,
     `import runtime from '${new URL(runtimeModule, new URL('../lib/', import.meta.url)).href}';`,
     `import overrides from '${new URL('overrides.js', new URL('../lib/', import.meta.url)).href}';`,
+    ...(sealed ? [`import installAotSealing from '${new URL('aot-runtime.js', new URL('../lib/', import.meta.url)).href}';`] : []),
     `import { stdStreamOptions } from '${new URL('streams.node.js', new URL('../lib/', import.meta.url)).href}';`,
     platformBoot,
     program,
@@ -300,6 +312,7 @@ if (web) {
     embed('runtime.js', src => src.replace(/^export default/m, 'const runtime =')),
     embed('streams.node.js', stripExports),
     embed('overrides.js', src => src.replace(/^export default/m, 'const overrides =')),
+    ...(sealed ? [embed('aot-runtime.js', src => src.replace(/^export default/m, 'const installAotSealing ='))] : []),
     platformBoot,
     program,
     main
