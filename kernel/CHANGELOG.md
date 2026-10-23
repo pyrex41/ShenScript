@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Changed
+
+- The type checker dereferences the checked term once per call in
+  `shen.search-user-datatypes` and `shen.by-hypothesis`, rather than once per
+  datatype rule and once per hypothesis. A failed iteration unwinds its
+  bindings, so the term is the same on every iteration. An empty hypothesis or
+  datatype list still fails at once, without dereferencing the term.
+
+### Added
+
+- Add 29 benchmark cases for list processing, nested pattern matching,
+  structural equality, mixed numeric arithmetic, returning-call preservation,
+  and allocation with live data, integrated into the existing categories.
+- Add a benchmark registration/result smoke check and document its invocation
+  and the new workloads' measurement boundaries.
+
 ## [43.1] - 2026-10-16
 
 ### Changed

@@ -18,7 +18,7 @@
 // (trap-error compiles its body before running it). shen-go lowers (42 1)
 // through apply() and raises a catchable runtime error. We pin ShenScript's
 // correct compile-time rejection rather than fake parity.
-import { equal, ok, throws } from 'node:assert';
+import { equal, match, ok, throws } from 'node:assert';
 import { parseForm } from '../../scripts/parser.js';
 import backend from '../../lib/backend.js';
 
@@ -34,7 +34,6 @@ describe('error robustness (port-authored, mirrors shen-go error_robustness)', (
   describe('runtime error paths are catchable with stable messages', () => {
     const cases = [
       ['apply unbound symbol', '(overflow->str)', 'function "overflow->str" is not defined'],
-      ['apply non-function bound to a variable', '(let F 42 (F 1))', 'F is not a function'],
       ['value of unbound global', '(value never-bound-xyz)', 'global "never-bound-xyz" is not defined'],
       ['if requires a boolean', '(if 42 1 2)', 'Shen boolean expected'],
       ['arithmetic on non-number', '(+ 1 "x")', 'number expected'],
@@ -43,6 +42,13 @@ describe('error robustness (port-authored, mirrors shen-go error_robustness)', (
       ['divide by zero', '(/ 1 0)', 'non-zero number expected'],
       ['explicit simple-error', '(simple-error "boom")', 'boom'],
     ];
+
+    it('applying a non-function preserves the catchable host error', async () => {
+      // V8 and JSC report the same failure; JSC appends the call and value.
+      // Keep production errors intact rather than normalizing engine text.
+      match(await caught('(let F 42 (F 1))'),
+        /^F is not a function(?:\. \(In 'F\(1\)', 'F' is 42\))?$/);
+    });
 
     for (const [name, trigger, want] of cases) {
       it(`${name}: catchable, message ${JSON.stringify(want)}`, async () => {

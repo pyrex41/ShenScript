@@ -24,7 +24,7 @@ Works in most modern browers (Chromium, Firefox, Safari and Edge).
 
 ## Installing
 
-**The published npm package [`shen-script`](https://www.npmjs.com/package/shen-script) (0.17.0, upstream) is library-only and stale**: it predates this fork, has no `bin` entry and ships no `bin/shen.js`, so `npm install -g shen-script` cannot produce a command-line Shen — and it carries an older kernel than the 41.2 vendored here.
+**The published npm package [`shen-script`](https://www.npmjs.com/package/shen-script) (0.17.0, upstream) is library-only and stale**: it predates this fork, has no `bin` entry and ships no `bin/shen.js`, so `npm install -g shen-script` cannot produce a command-line Shen — and it carries an older kernel than the 43.1 snapshot vendored here.
 
 For a working CLI, install from this repo:
 
@@ -38,16 +38,17 @@ or as a git dependency (`npm install github:pyrex41/ShenScript`), which also tri
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 43.1** release (`Shen-Language/shen-sources`, tag `shen-43.1`), including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 43.1** sources, including PR 117 at `ec16a9f` and the latest benchmark expansion at `9693dc6`, including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
 | `test-backend`           | Runs `mocha` tests for the basic environment and compiler.                                              |
-| `verify-kernel`          | Checks the vendored kernel sources against `kernel/klambda/SHA256SUMS`.                                 |
-| `vendor-kernel`          | Re-downloads the kernel release archive, checks its SHA-256 and refreshes `kernel/` (preserves provenance). |
+| `verify-kernel`          | Checks the entire vendored kernel against `kernel/SHA256SUMS` (including filenames with spaces).                                 |
+| `vendor-kernel`          | Re-downloads the pinned kernel build and source additions, authenticates both archives, and refreshes `kernel/` and its checksum manifests. |
 | `render-kernel`          | Translates the kernel sources to JavaScript at `lib/kernel.js`.                                         |
 | `build-kernel`           | Runs `render-kernel` — the full build from a clean checkout.                                             |
 | `test-kernel`            | Runs the certification test suite that comes with the Shen kernel.                                      |
+| `test-benchmarks` | Runs the 29 upstream benchmark registration/result checks without timed loops. |
 | `test-kernel-extensions` | Runs the kernel's extension test suite (features, pattern matching, type annotations, source forms, namespaces). |
 | `test-frontend`          | Runs `mocha` tests for helper and interop functions.                                                    |
 | `bundle-dev`    | Applies babel transforms and webpack's into web-deployable bundle.                                                |
@@ -88,7 +89,13 @@ node bin/yggdrasil-build.js <shaken-dir> <out.js> [--linked]
 
 The default mode emits one self-contained ES module (~120KB for the fib demo, no dependencies) that runs on Node 20+, Bun and Deno. `--linked` emits a small artifact that imports from this checkout and is the only mode supporting `needs-eval=true` programs.
 
-## Benchmarks
+## Current performance investigation
+
+The source-bound 43.1 refresh and Chez-guided runtime experiment are recorded
+in [the performance report](docs/performance-43.1.md). Current measurements are
+separate from the historical timings below.
+
+## Historical benchmarks
 
 Measured 2026-06-12 on an Apple M4 (macOS 26.5.1) with Node v25.4.0, Bun 1.3.14, Deno 2.8.3, after the call-path optimizations that landed the same day (arity-specialized wrappers; plain async wrappers; maybe-await call sites, sync demotion and let flattening — see the git log). All three runtimes pass every suite.
 
