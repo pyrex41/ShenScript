@@ -1,6 +1,7 @@
 # ShenScript AOT performance plan
 
-Status: planned; implementation has not started.
+Status: M0 implemented in the release worktree; M1–M6 remain active work.
+See [the baseline report](aot-baseline.md) for current evidence and limits.
 Source inspected: `45be974e1f11b7bb0ac102a280a4cd63ac61ff8f`.
 Primary target: complete applications emitted through Yggdrasil/Ratatoskr,
 with the fastest practical JavaScript execution consistent with their declared

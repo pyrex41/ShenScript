@@ -1,0 +1,41 @@
+// Exercise the shipped stage-2 CLI from a fresh production-only installation.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+
+const root = fileURLToPath(new URL('../../', import.meta.url));
+if (process.argv.length !== 3) throw new Error('Usage: test.package.js NEW_EVIDENCE_DIRECTORY');
+const out = path.resolve(process.argv[2]); fs.mkdirSync(out, { recursive: false });
+const run = (label, command, args, options = {}) => {
+  const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 8388608, ...options });
+  fs.writeFileSync(path.join(out, label + '.stdout'), result.stdout || '');
+  fs.writeFileSync(path.join(out, label + '.stderr'), result.stderr || '');
+  if (result.error || result.status !== 0) throw result.error || new Error(label + ' failed');
+  return result;
+};
+const packed = run('pack', 'npm', ['pack', '--json', '--pack-destination', out]);
+const offset = packed.stdout.lastIndexOf('\n[');
+const metadata = JSON.parse(offset < 0 ? packed.stdout : packed.stdout.slice(offset + 1))[0];
+assert.ok(metadata.files.some(x => x.path === 'scripts/parser.js'));
+assert.ok(metadata.files.some(x => x.path === 'scripts/config.js'));
+const tarball = path.join(out, metadata.filename), install = path.join(out, 'install'); fs.mkdirSync(install);
+const lock = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
+const versions = Object.fromEntries(['astring', 'parsimmon'].map(name => [name, lock.packages['node_modules/' + name].version]));
+fs.writeFileSync(path.join(install, 'package.json'), JSON.stringify({ private: true, type: 'module', overrides: versions }) + '\n');
+run('install', 'npm', ['install', '--prefix', install, '--no-audit', '--no-fund', tarball]);
+const pkg = path.join(install, 'node_modules/shen-script');
+for (const [name, version] of Object.entries(versions)) assert.equal(JSON.parse(fs.readFileSync(path.join(install, 'node_modules', name, 'package.json'), 'utf8')).version, version);
+const cli = run('cli', process.execPath, [path.join(pkg, 'bin/shen.js'), 'eval', '-e', '(+ 2 3)'], { cwd: install });
+assert.equal(cli.stdout, '5\n');
+const moduleFile = path.join(install, 'fib.mjs');
+run('build', process.execPath, [path.join(pkg, 'bin/yggdrasil-build.js'), path.join(root, 'test/yggdrasil/fixtures/fib'), moduleFile, '--module']);
+const code = `import $ from ${JSON.stringify(pathToFileURL(moduleFile).href)};
+if (await $.caller('fib')(10) !== 55) throw new Error('packed AOT caller');
+console.log('PACKED_AOT_PASS');`;
+const result = run('execute', process.execPath, ['--input-type=module', '-e', code], { cwd: install });
+assert.equal(result.stdout, 'fib 20 = 6765\nPACKED_AOT_PASS\n');
+fs.writeFileSync(path.join(out, 'identity.json'), JSON.stringify({ tarball: metadata.filename, sha256: createHash('sha256').update(fs.readFileSync(tarball)).digest('hex'), dependencies: versions }, null, 2) + '\n');
+console.log('PACKAGED_AOT PASS');

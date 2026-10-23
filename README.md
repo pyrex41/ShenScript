@@ -89,6 +89,21 @@ node bin/yggdrasil-build.js <shaken-dir> <out.js> [--linked]
 
 The default mode emits one self-contained ES module (~120KB for the fib demo, no dependencies) that runs on Node 20+, Bun and Deno. `--linked` emits a small artifact that imports from this checkout and is the only mode supporting `needs-eval=true` programs.
 
+The stage-2 builder also accepts `--module` to export an initialized Node/Bun/Deno
+module with the caller API (including with `--linked`):
+
+```sh
+node bin/yggdrasil-build.js SHAKE app.mjs --module
+```
+
+```js
+import shen from './app.mjs';
+const result = await shen.caller('application-entry')(input);
+```
+
+The [AOT benchmark guide](benchmarks/aot/README.md) records artifact generation,
+source provenance, full result validation and paired measurement commands.
+
 ## Current performance investigation
 
 The source-bound 43.1 refresh and Chez-guided runtime experiment are recorded

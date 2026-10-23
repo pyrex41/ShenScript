@@ -137,6 +137,23 @@ for (const { name, expected, linked } of fixtures) {
   if (!refused) failed = true;
 }
 
+// Module artifacts await initialization, expose callers and retain rebinding.
+for (const linked of [false, true]) {
+  const file = path.join(outDir, linked ? 'module-linked.mjs' : 'module.mjs');
+  execFileSync(process.execPath, [path.join(root, 'bin/yggdrasil-build.js'),
+    path.join(root, 'test/yggdrasil/fixtures/fib'), file, '--module', ...(linked ? ['--linked'] : [])]);
+  const code = `import $ from ${JSON.stringify(pathToFileURL(file).href)};
+    const call = $.caller('fib');
+    if (await call(10) !== 55) throw new Error('module caller result');
+    $.defun('fib', x => x + 1000);
+    if (await call(10) !== 1010) throw new Error('module rebinding');
+    console.log('MODULE_PASS');`;
+  const result = execFileSync(process.execPath, ['--input-type=module', '-e', code], { encoding: 'utf8' });
+  if (result !== 'fib 20 = 6765\nMODULE_PASS\n') {
+    console.error('  FAIL - module initialization/caller ordering'); failed = true;
+  } else console.log('  ok - initialized module API' + (linked ? ' (linked)' : ' (self-contained)'));
+}
+
 fs.rmSync(outDir, { recursive: true, force: true });
 
 if (failed) {

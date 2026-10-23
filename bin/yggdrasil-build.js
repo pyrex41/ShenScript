@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Ratatoskr stage-2 builder for ShenScript.
 //
-//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web]
+//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
 // kernel (kernel.kl, Shen 42.x or 43.1 defuns in load order), the user
@@ -16,6 +16,8 @@
 //   * --linked: small output that imports those modules from this
 //     checkout - useful during development, and the only mode that
 //     supports needs-eval=true (it can import the compiler).
+//   * --module: export the initialized Node/Bun/Deno environment and caller API
+//     instead of running as a CLI; can also be combined with --linked.
 //   * --web: fully self-contained, but BROWSER-safe - no `node:fs`, no
 //     streams.node.js, no process/Deno platform probe. Instead of a `main`
 //     that runs the program and calls process.exit, it boots the runtime,
@@ -47,12 +49,13 @@ import {
   Arrow, Block, Call, Const, Id, Let, Literal, NewObj, Program, Property, Return, Statement, generate
 } from '../lib/ast.js';
 
-const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web]';
+const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module]';
 
-const FLAGS = new Set(['--linked', '--web']);
+const FLAGS = new Set(['--linked', '--web', '--module']);
 const args = process.argv.slice(2).filter(a => !FLAGS.has(a));
 const linked = process.argv.includes('--linked');
 const web = process.argv.includes('--web');
+const moduleOutput = process.argv.includes('--module');
 
 if (process.argv.includes('-h') || process.argv.includes('--help') || args.length !== 2) {
   console.error(USAGE);
@@ -221,7 +224,12 @@ const platform = {
 };
 `;
 
-const main = `
+const main = moduleOutput ? `
+const $ = runtime({ ...platform, ...stdStreamOptions() });
+await run($);
+$.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(cell.f(...args)); };
+export default $;
+` : `
 const $ = runtime({ ...platform, ...stdStreamOptions() });
 run($).catch(e => {
   console.error(e && e.message ? e.message : e);
