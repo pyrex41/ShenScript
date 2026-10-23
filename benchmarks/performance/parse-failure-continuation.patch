@@ -1,0 +1,59 @@
+diff --git a/lib/backend.js b/lib/backend.js
+index 661200e..632fbf6 100644
+--- a/lib/backend.js
++++ b/lib/backend.js
+@@ -1,6 +1,6 @@
+ import {
+-  Arrow, Assign, Await, Binary, Block, Call, Catch, Conditional, Id, Iife, Lets, Literal,
+-  Member, Return, SafeId, Sequence, Template, Try, Unary, Vector,
++  Arrow, Assign, Await, Binary, Block, Call, Catch, Conditional, Id, Iife, Let, Lets, Literal,
++  Member, NewObj, Property, Return, SafeId, Sequence, Template, Try, Unary, Vector,
+   generate, isStatement
+ } from './ast.js';
+ import {
+@@ -265,10 +265,34 @@ const buildTrap = (context, [_trap, body, handler]) =>
+             Catch(Id('e$'), Block(Return(Call(y, [Id('e$')])))))), context.async),
+         uncast(build(context.now(), body)),
+         uncast(build(context, handler)));
+-const buildFunction = (context, params, body) => {
++// EXPERIMENT: only the measured kernel definition, with its original shape.
++// This is an opt-in proof target, not a general suspension transformation.
++const buildParseFailureContinuation = (params, compiled) => {
++  if (params.length !== 1 || !isSymbol(params[0])) return null;
++  const cell = SafeId('fail', '$c');
++  const argument = SafeId(nameOf(params[0]));
++  const result = Id('result$');
++  const compare = value => Call$('asShenBool', [Call$('equate', [argument, value])]);
++  // Match compiled syntax so lexical shadowing and replacement inliners
++  // fall back to normal compilation. Reuse the original fabrication's cells.
++  const expected = compare(MaybeAwait(Call$('t', [Call(Member(cell, Id('f')), [])])));
++  if (generate(compiled) !== generate(expected)) return null;
++  const body = Arrow([argument], Block(Try(Block(
++    Let(result, Call$('t', [Call(Member(cell, Id('f')), [])])),
++    Return(Conditional(Binary('instanceof', result, Id('Promise')),
++      Call(Arrow([], compare(Await(result)), true), []), compare(result)))),
++  Catch(Id('error$'), Block(Return(Call(Member(Id('Promise'), Id('reject')), [Id('error$')])))))));
++  // Keep the async calling convention for currying, overapplication and JS
++  // metadata even though ordinary successful calls now return a value.
++  return Call$('l', [Call(Member(Id('Object'), Id('assign')), [body,
++    NewObj([Property(Id('async'), Literal(true))])])]);
++};
++const buildFunction = (context, params, body, continuation = false) => {
+   const fn = { temps: [], n: 0 };
+   return assemble(
+     b => {
++      const lifted = continuation && buildParseFailureContinuation(params, b);
++      if (lifted) return lifted;
+       // demote to a plain function when the compiled body never suspends:
+       // callers always settle or maybe-await results, so a sync callee just
+       // means the await gets skipped
+@@ -290,7 +314,8 @@ const buildDefun = (context, [_defun, symbol, params, body]) =>
+   assemble(
+     (s, b) => Call$('d', [s, b]),
+     inlineName(context, symbol),
+-    buildFunction(hasExternalCalls(symbol, body) ? context : context.sync(), params, body));
++    buildFunction(hasExternalCalls(symbol, body) ? context : context.sync(), params, body,
++      symbol === s`shen.parse-failure?`));
+ const buildCons = (context, expr) => {
+   const { result, state } = produceState(x => isForm(x, 3, 'cons'), x => x[1], x => x[2], expr);
+   return isEArray(state) || state === null

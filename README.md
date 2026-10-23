@@ -99,6 +99,9 @@ Promise resources but did not qualify an end-to-end speedup; it is not enabled.
 The [async boundary profile](docs/performance-async-boundaries.md) identifies
 unconditional async wrappers as the next measured target; compiler defaults
 remain unchanged.
+The opt-in [continuation prototype](docs/performance-continuation.md) shows a
+parser improvement in busy-host paired trials, with JS scheduling compatibility
+still open.
 
 ## Historical benchmarks
 

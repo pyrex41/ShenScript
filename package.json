@@ -34,7 +34,8 @@
     "kernel/klambda/PROVENANCE.md",
     "docs/performance-43.1.md",
     "docs/performance-macro-walk.md",
-    "docs/performance-async-boundaries.md"
+    "docs/performance-async-boundaries.md",
+    "docs/performance-continuation.md"
   ],
   "devDependencies": {
     "c8": "^10.1.3",
