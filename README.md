@@ -102,6 +102,8 @@ remain unchanged.
 The opt-in [continuation prototype](docs/performance-continuation.md) shows a
 parser improvement in busy-host paired trials, with JS scheduling compatibility
 still open.
+The next work is sequenced in the [AOT performance plan](docs/aot-performance-plan.md),
+with emitted Yggdrasil applications as the primary target.
 
 ## Historical benchmarks
 
