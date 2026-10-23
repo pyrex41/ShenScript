@@ -96,6 +96,9 @@ in [the performance report](docs/performance-43.1.md). Current measurements are
 separate from the historical timings below. The follow-up
 [macro-walking experiment](docs/performance-macro-walk.md) reduced instrumented
 Promise resources but did not qualify an end-to-end speedup; it is not enabled.
+The [async boundary profile](docs/performance-async-boundaries.md) identifies
+unconditional async wrappers as the next measured target; compiler defaults
+remain unchanged.
 
 ## Historical benchmarks
 
