@@ -1,0 +1,76 @@
+diff --git a/lib/overrides.js b/lib/overrides.js
+index f535156..2dc83f6 100644
+--- a/lib/overrides.js
++++ b/lib/overrides.js
+@@ -117,9 +117,20 @@ export default ($, { nativeDict = true } = {}) => {
+   // a registered source-form handler (shen.*source-form-handlers*, an alist
+   // keyed by head symbol) is left untouched - neither descended into nor passed
+   // to a macro - so the reader can expand it with its handler afterwards.
+-  const applyMacro = async (f, x) => {
+-    const w = await settle(f(x));
+-    return w === x || equate(w, x) ? x : w;
++  const preserveMacroIdentity = (x, w) => w === x || equate(w, x) ? x : w;
++  const awaitMacro = async (x, w) => preserveMacroIdentity(x, await w);
++  const applyMacro = (f, x) => {
++    const w = settle(f(x));
++    if (w instanceof Promise) return awaitMacro(x, w);
++    // The former unconditional await also accepted foreign thenables. Read
++    // their getter once and retain the original receiver and async boundary.
++    if (w !== null && (typeof w === 'object' || typeof w === 'function')) {
++      const then = w.then;
++      if (typeof then === 'function') {
++        return awaitMacro(x, { then: (resolve, reject) => Reflect.apply(then, w, [resolve, reject]) });
++      }
++    }
++    return preserveMacroIdentity(x, w);
+   };
+   const hasHandler = (handlers, x) => {
+     if (!isCons(x) || handlers.length === 0) {
+@@ -127,22 +138,32 @@ export default ($, { nativeDict = true } = {}) => {
+     }
+     return handlers.some(entry => isCons(entry) && equate(entry.head, x.head));
+   };
+-  const macroWalk = async (f, x, handlers) => {
+-    if (isCons(x)) {
+-      if (hasHandler(handlers, x)) {
+-        return x;
+-      }
+-      let changed = false;
+-      const items = [];
+-      for (let c = x; isCons(c); c = c.tail) {
+-        const w = await macroWalk(f, c.head, handlers);
+-        changed = changed || w !== c.head;
+-        items.push(w);
+-      }
+-      const rebuilt = changed ? toList(items) : x;
+-      return await applyMacro(f, rebuilt);
++  // Enter this loop only after an actual suspension. Awaiting siblings in one
++  // frame avoids retaining a .then continuation for every item of a long list.
++  const macroWalkAsync = async (f, x, handlers, c, items, changed, pending) => {
++    let w = await pending;
++    changed = changed || w !== c.head;
++    items.push(w);
++    for (c = c.tail; isCons(c); c = c.tail) {
++      w = macroWalk(f, c.head, handlers);
++      if (w instanceof Promise) w = await w;
++      changed = changed || w !== c.head;
++      items.push(w);
++    }
++    return applyMacro(f, changed ? toList(items) : x);
++  };
++  const macroWalk = (f, x, handlers) => {
++    if (!isCons(x)) return applyMacro(f, x);
++    if (hasHandler(handlers, x)) return x;
++    let changed = false;
++    const items = [];
++    for (let c = x; isCons(c); c = c.tail) {
++      const w = macroWalk(f, c.head, handlers);
++      if (w instanceof Promise) return macroWalkAsync(f, x, handlers, c, items, changed, w);
++      changed = changed || w !== c.head;
++      items.push(w);
+     }
+-    return await applyMacro(f, x);
++    return applyMacro(f, changed ? toList(items) : x);
+   };
+   defun('macroexpand', async x => {
+     const fns = toArray(valueOf('*macros*')).map(p => asCons(p).tail);

@@ -93,7 +93,9 @@ The default mode emits one self-contained ES module (~120KB for the fib demo, no
 
 The source-bound 43.1 refresh and Chez-guided runtime experiment are recorded
 in [the performance report](docs/performance-43.1.md). Current measurements are
-separate from the historical timings below.
+separate from the historical timings below. The follow-up
+[macro-walking experiment](docs/performance-macro-walk.md) reduced instrumented
+Promise resources but did not qualify an end-to-end speedup; it is not enabled.
 
 ## Historical benchmarks
 

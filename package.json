@@ -32,7 +32,8 @@
     "bin/*.js",
     "kernel/LICENSE.txt",
     "kernel/klambda/PROVENANCE.md",
-    "docs/performance-43.1.md"
+    "docs/performance-43.1.md",
+    "docs/performance-macro-walk.md"
   ],
   "devDependencies": {
     "c8": "^10.1.3",
