@@ -86,7 +86,8 @@ cannot collide with escaped Shen identifiers. Stop at nested function boundaries
 Fallback to the original async arrow for unsupported statement shapes (including
 new tail-loop bodies at first), unsafe targets or excessive code growth. Reject functions with more than 16 await sites, cap construction at 2,048
 lowering steps, and cap output at four times input AST nodes plus 128.
-The analysis sidecar records each transformed function and fallback reason.
+An absolute 20,000-node limit also applies. The analysis sidecar records each
+transformed function and fallback reason.
 M4 loops can stay async while benefiting from adaptive scalar-returning callees.
 
 ## Qualification requirements
@@ -112,13 +113,16 @@ Their source and reconstruction instructions are in
 `benchmarks/experiments/aot-generators/`; no iterator driver is shipped.
 
 The implemented pass emits plain branches and native async continuations.
-Unknown or unsupported expressions stay on the original path. It adapts named
+Unknown or unsupported expressions stay on the original path. Direct eval,
+compound assignments across awaits, sparse/spread arrays with awaits, optional
+references, nullish operators and nonstandard parameter/declaration shapes
+fall back. These limits preserve lexical scope and reference evaluation timing. It adapts named
 functions only; anonymous callbacks remain ordinary functions. Static public
 calls to names never transformed in the build avoid WeakMap probes. Later
 redefinitions still work through their public functions, and linked future eval
 uses the adaptive backend when requested. Ordinary builds import no adapter.
 
-Eleven backend controls pass on Node and Bun, including effect order, receivers,
+Fifteen backend controls pass on Node and Bun, including effect order, receivers,
 callee capture, actual incremental I/O, foreign thenables, public ABI and bounded
 fallback. The entire ec16a9f kernel was independently rendered with this pass:
 154 kernel, 123 extension and 29 benchmark checks pass on both engines. Source

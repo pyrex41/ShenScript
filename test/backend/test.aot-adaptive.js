@@ -1,14 +1,15 @@
 import { equal, deepEqual, ok, rejects } from 'node:assert/strict';
 import backend from '../../lib/backend.js';
 import installAdaptive from '../../lib/aot-adaptive-runtime.js';
-import lowerAdaptive from '../../lib/aot-adaptive.js';
+import lowerAdaptive, { pruneAdaptiveCalls } from '../../lib/aot-adaptive.js';
 import { parseFile } from '../../scripts/parser.js';
-import { Block, Const, Id, Call, Member } from '../../lib/ast.js';
+import { Assign, Block, Const, Id, Call, Member, Vector } from '../../lib/ast.js';
 
 const setup = async (code, adaptive = true, options = {}) => {
   const stats = {}, $ = backend(adaptive ? { aotAdaptive: lowerAdaptive, aotStats: stats, ...options } : options);
   if (adaptive) installAdaptive($);
   const forms = parseFile(code), body = $.assemble(Block, ...forms.map($.construct));
+  if (adaptive) pruneAdaptiveCalls(body.ast, stats);
   await $.evalJs(Block(...Object.entries(body.subs).map(([name, value]) => Const(Id(name), value)), ...body.ast.body));
   return { $, stats, call: (name, ...args) => $.settle($.lookup(name).f(...args)) };
 };
@@ -103,5 +104,34 @@ describe('explicit bounded adaptive continuations', () => {
     const terms = Array.from({ length: 20 }, (_, i) => '(host ' + i + ')');
     const { $, stats, call } = await setup('(defun large (X) ' + terms.reduceRight((rest, term) => rest ? '(do ' + term + ' ' + rest + ')' : term, '') + ')' );
     $.defun('host', x => x); equal(await call('large', 0), 19); ok(stats.siteBudget > 0);
+  });
+  it('keeps direct eval in its original lexical scope', async () => {
+    const { $ } = await setup('');
+    $.inline('lexical', null, [null], expression => Call(Id('eval'), [expression]));
+    await $.evalKl($.toListTree(parseFile('(defun f (X) (lexical (host X)))')[0]));
+    $.defun('host', async _x => 'X + 1');
+    equal(await $.settle($.lookup('f').f(2)), 3);
+  });
+  it('reads a compound assignment operand before the awaited RHS mutates it', async () => {
+    const { $ } = await setup('');
+    $.inline('plus', null, [null], value => Assign(Id('X'), value, '+='));
+    $.inline('setx', null, [null], value => Assign(Id('X'), value));
+    await $.evalKl($.toListTree(parseFile('(defun f (X) (let R (plus (host (freeze (setx 10)))) (cons R (cons X ()))))')[0]));
+    $.defun('host', async f => { await $.settle(f()); return 2; });
+    deepEqual($.toArrayTree(await $.settle($.lookup('f').f(1))), [3, 3]);
+  });
+  it('preserves holes in sparse arrays with a suspending element', async () => {
+    const { $ } = await setup('');
+    $.inline('sparse', null, [null], value => Vector([null, value]));
+    await $.evalKl($.toListTree(parseFile('(defun f (X) (sparse (host X)))')[0]));
+    $.defun('host', async x => x);
+    const result = await $.settle($.lookup('f').f(2)); equal(result.length, 2); equal(0 in result, false); equal(result[1], 2);
+  });
+  it('keeps a captured public callee receiver across argument suspension', async () => {
+    const { $, call } = await setup('(defun f (X) (+ 1 (host (fetch X))))');
+    $.lookup('host').tag = 10;
+    $.defun('host', Object.assign(function (x) { return this.tag + x; }, { arity: 1 }));
+    $.defun('fetch', async x => x);
+    equal(await call('f', 2), 13);
   });
 });
