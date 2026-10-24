@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Ratatoskr stage-2 builder for ShenScript.
 //
-//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed]
+//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
 // kernel (kernel.kl, Shen 42.x or 43.1 defuns in load order), the user
@@ -44,21 +44,24 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import backend from '../lib/backend.js';
 import { analyzeAot } from '../lib/aot-analysis.js';
+import lowerTail from '../lib/aot-tail.js';
 import overrides from '../lib/overrides.js';
 import { parseFile } from '../scripts/parser.js';
 import {
   Arrow, Block, Call, Const, Id, Let, Lets, Literal, NewObj, Program, Property, Return, Statement, generate
 } from '../lib/ast.js';
 
-const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed]';
+const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]]';
 
-const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed', '--no-direct']);
+const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed', '--no-direct', '--tail-loops']);
 const args = process.argv.slice(2).filter(a => !FLAGS.has(a));
 const linked = process.argv.includes('--linked');
 const web = process.argv.includes('--web');
 const moduleOutput = process.argv.includes('--module');
 const sealed = process.argv.includes('--sealed');
 const analyze = process.argv.includes('--analyze') || sealed;
+const tailLoops = process.argv.includes('--tail-loops');
+if (tailLoops && !sealed) throw new Error('--tail-loops requires --sealed');
 const directCalls = sealed && !process.argv.includes('--no-direct');
 if (process.argv.includes('--no-direct') && !sealed) throw new Error('--no-direct requires --sealed');
 
@@ -163,7 +166,7 @@ const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
 const aot = analyze ? analyzeAot([...kernelForms, ...userForms.flatMap(x => x.forms)], { nativeNames: defined }) : null;
 if (aot) { aot.directCalls = directCalls; aot.emitted = { headCalls: 0, workers: 0 }; }
-const $ = backend(sealed ? { aotAnalysis: aot } : {});
+const $ = backend(sealed ? { aotAnalysis: aot, ...(tailLoops ? { aotTail: lowerTail } : {}) } : {});
 const { assemble, construct, isArray, s } = $;
 
 // Call the manifest's init function (e.g. shen.initialise) only if the shaken
@@ -283,7 +286,7 @@ $.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(c
 export default $;
 `;
 
-if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, directCalls, emitted: aot.emitted, ...aot.report }, null, 2) + '\n');
+if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, directCalls, tailLoops, emitted: aot.emitted, ...aot.report }, null, 2) + '\n');
 
 let artifact;
 
