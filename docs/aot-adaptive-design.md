@@ -9,7 +9,8 @@ contain foreign JS values. Do not demote callers on that assumption.
 The explicit alternative: keep public async ABI and mutable-cell behavior, but let
 internal calls run synchronously until an executed await actually receives a
 native Promise. Use the explicit `--adaptive` execution profile, separately
-from sealed bindings. Internal incidental microtask yields may disappear;
+from sealed bindings. Internal scheduling may change: incidental microtask yields may disappear,
+and bounded checkpoints can insert a yield;
 actual asynchronous operations must still suspend. Programs relying on those
 incidental yields for shared-state coordination must use ordinary output.
 Public compiled async functions must retain Promise results, async metadata,
@@ -83,12 +84,13 @@ calls under the documented stable-intrinsic contract. Never read a dynamic
 
 Keep original declarations for w$/flattened lets. New temps use names that
 cannot collide with escaped Shen identifiers. Stop at nested function boundaries.
-Fallback to the original async arrow for unsupported statement shapes (including
+Retain native async execution for unsupported statement shapes (including
 new tail-loop bodies at first), unsafe targets or excessive code growth. Reject functions with more than 16 await sites, cap construction at 2,048
 lowering steps, and cap output at four times input AST nodes plus 128.
 An absolute 20,000-node limit also applies. The analysis sidecar records each
 transformed function and fallback reason.
-M4 loops can stay async while benefiting from adaptive scalar-returning callees.
+The current M4 pass handles synchronous bodies only. Async self-tail bodies
+retain trampolines while benefiting from adaptive scalar-returning callees.
 
 ## Qualification requirements
 
@@ -113,7 +115,8 @@ Their source and reconstruction instructions are in
 `benchmarks/experiments/aot-generators/`; no iterator driver is shipped.
 
 The implemented pass emits plain branches and native async continuations.
-Unknown or unsupported expressions stay on the original path. Direct eval,
+Unsupported expressions retain native async execution, with the adaptive
+profile scheduling checkpoints still applied. Direct eval,
 compound assignments across awaits, sparse/spread arrays with awaits, optional
 references, nullish operators and nonstandard parameter/declaration shapes
 fall back. These limits preserve lexical scope and reference evaluation timing. It adapts named
@@ -122,7 +125,7 @@ calls to names never transformed in the build avoid WeakMap probes. Later
 redefinitions still work through their public functions, and linked future eval
 uses the adaptive backend when requested. Ordinary builds import no adapter.
 
-Fifteen backend controls pass on Node and Bun, including effect order, receivers,
+Nineteen backend controls pass on Node and Bun, including effect order, receivers,
 callee capture, actual incremental I/O, foreign thenables, public ABI and bounded
 fallback. The entire ec16a9f kernel was independently rendered with this pass:
 154 kernel, 123 extension and 29 benchmark checks pass on both engines. Source
@@ -130,3 +133,29 @@ and receipts are retained under `_build/performance/aot/20261024/`. Browser-safe
 source and mode controls pass; real browser-engine execution and Deno adaptive
 execution remain unqualified. Higher-order specialization is a later measured
 step; do not infer callback purity or suspension properties from this pass.
+
+## Stack and synchronous-boundary safeguards
+
+Removing a fulfilled-Promise yield can turn previously safe head recursion into
+native JS recursion. This affects fallback and anonymous callers too when they
+call a transformed leaf. The adaptive profile inserts a caller-side checkpoint
+before every general head call in an async compilation context. Every 64th
+checkpoint awaits a shared fulfilled Promise. Inline primitives and existing
+synchronous compilation contexts retain their original convention. Tail calls
+still use the trampoline unless the separate synchronous M4 pass applies.
+
+The checkpoint await occurs in the caller before the call, rather than in a
+Promise wrapper around the callee result. This matters for foreign thenables
+that the original call treated as data. It preserves callee-before-argument
+order within the call and avoids extra result assimilation. Internal callback
+start/microtask order can differ; use ordinary output for programs relying on
+that ordering. The native public async Promise protocol remains in place.
+
+Hybrid workers are used only where the original caller has a maybe-await
+boundary. A saved synchronous closure retains its original behavior after its
+callee is redefined asynchronously. Checkpoint sites count toward the pass's
+16-await budget and its instrumented-input AST growth limit.
+
+Retained red/green controls cover 20,000-level head recursion in transformed,
+fallback and anonymous owners, forced-checkpoint thenable data, and synchronous
+caller rebinding. Pre-checkpoint timings do not qualify the safeguarded version.

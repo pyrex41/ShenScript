@@ -134,4 +134,33 @@ describe('explicit bounded adaptive continuations', () => {
     $.defun('fetch', async x => x);
     equal(await call('f', 2), 13);
   });
+  it('keeps deep head recursion safe when a formerly yielding prefix becomes synchronous', async () => {
+    for (const adaptive of [false, true]) {
+      const { $, call } = await setup('(defun leaf (X) (+ 1 (host X))) (defun walk (N) (if (= N 0) 0 (do (leaf N) (+ 1 (walk (- N 1))))))', adaptive);
+      $.defun('host', x => x); equal(await call('walk', 20000), 20000);
+    }
+  });
+  it('protects fallback and anonymous owners when their callee loses an incidental yield', async () => {
+    const dead = Array.from({ length: 20 }, (_, i) => '(host ' + i + ')').reduceRight((rest, term) => rest ? '(do ' + term + ' ' + rest + ')' : term, '');
+    const { $, call } = await setup('(defun leaf (X) (+ 1 (host X))) (defun walk (N) (if (= N -1) ' + dead + ' (if (= N 0) 0 (do (leaf N) (+ 1 (walk (- N 1))))))) (defun anonymous (N) ((lambda F (F F N)) (lambda Self (lambda K (if (= K 0) 0 (do (leaf K) (+ 1 (Self Self (- K 1)))))))))');
+    $.defun('host', x => x); equal(await call('walk', 20000), 20000); equal(await call('anonymous', 20000), 20000);
+  });
+  it('preserves opaque thenables as data when a scheduling checkpoint suspends', async () => {
+    for (const adaptive of [false, true]) {
+      const { $, call } = await setup('(defun f (X) (+ 1 (host X)))', adaptive);
+      let reads = 0; const value = { get then() { reads++; return yes => yes(7); } };
+      $.defun('host', _x => value);
+      if (adaptive) for (let i = 0; i < 63; i++) $.aotCheckpoint();
+      await rejects(() => call('f', 1), /number expected/); equal(reads, 0);
+    }
+  });
+  it('retains the original synchronous caller behavior after async rebinding', async () => {
+    for (const adaptive of [false, true]) {
+      const { $, call } = await setup('(defun f (X) (lambda Y (+ 1 (f Y))))', adaptive);
+      const saved = await call('f', 0);
+      $.defun('host', x => x);
+      await $.evalKl($.toListTree(parseFile('(defun f (X) (+ 1 (host X)))')[0]));
+      await rejects(async () => $.settle(saved(2)), /number expected/);
+    }
+  });
 });
