@@ -26,6 +26,10 @@ jobs:
       - run: npm run test-kernel
       - run: npm run test-kernel-extensions
       - run: npm run test-yggdrasil
+      - run: npm run test-benchmarks
+      - run: npm run test-aot
+        env:
+          AOT_TEST_ENGINES: node
       - run: npm run bundles
 
   bun:
@@ -40,6 +44,10 @@ jobs:
       - run: npm run build-kernel
       - run: npm run test-smoke-bun
       - run: npm run test-kernel-bun
+      - run: bun node_modules/mocha/bin/mocha.js test/backend/test.*.js test/cli/test.*.js test/frontend/test.*.js --reporter dot --timeout 70000
+      - run: npm run test-aot
+        env:
+          AOT_TEST_ENGINES: bun
 
   deno:
     runs-on: ubuntu-latest

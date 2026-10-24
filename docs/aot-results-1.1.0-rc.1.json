@@ -1,0 +1,2028 @@
+{
+  "status": "source-bound correctness passes; shared-host performance remains exploratory",
+  "compiler_safeguards_commit": "583677d",
+  "kernel": "community 43.1 ec16a9f; benchmark additions9693dc6",
+  "exporter": "0aa8947e22f54a83cda091d37782c923084c6d66",
+  "engines": {
+    "node": "v22.23.3",
+    "bun": "1.4.3"
+  },
+  "host": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "architecture": "arm64"
+  },
+  "processes": 160,
+  "pairs_per_app_engine": 10,
+  "warmup": 1000,
+  "scheduling_checkpoint_head_calls": 64,
+  "counts": {
+    "node": {
+      "parser": 1718,
+      "rules": 16228,
+      "lists": 8497,
+      "numerical": 3489
+    },
+    "bun": {
+      "parser": 716,
+      "rules": 4260,
+      "lists": 4188,
+      "numerical": 4107
+    }
+  },
+  "profiles": {
+    "parser": [
+      "--linked",
+      "--module",
+      "--adaptive"
+    ],
+    "rules": [
+      "--module",
+      "--sealed",
+      "--tail-loops"
+    ],
+    "lists": [
+      "--module",
+      "--sealed",
+      "--tail-loops"
+    ],
+    "numerical": [
+      "--module",
+      "--sealed",
+      "--adaptive",
+      "--tail-loops"
+    ]
+  },
+  "snapshot_sha256": {
+    "checkpoint-v2-control-frozen": "858650bf09e1840a972ef37afaf89e5b811a2aee01be2734bb8d9e499552e550",
+    "checkpoint-v2-selected-frozen": "4574389878fc54deb84b7ba0a79ea16be1420e6bc31a90ae8bc9b63a094b5ea1"
+  },
+  "node_promise_resources": {
+    "parser": {
+      "requests": 100,
+      "baseline": 5864403,
+      "candidate": 1687052,
+      "reduction_percent": 71.23233174800572
+    },
+    "rules": {
+      "requests": 100,
+      "baseline": 99603,
+      "candidate": 99603,
+      "reduction_percent": 0.0
+    },
+    "lists": {
+      "requests": 100,
+      "baseline": 423203,
+      "candidate": 423203,
+      "reduction_percent": 0.0
+    },
+    "numerical": {
+      "requests": 100,
+      "baseline": 5501003,
+      "candidate": 899610,
+      "reduction_percent": 83.64643684069978
+    }
+  },
+  "results": {
+    "bun": {
+      "lists": {
+        "first": {
+          "baseline": {
+            "cpu_us": 4840.0,
+            "wall_ns": 1113708.0,
+            "rss": 17392288.0,
+            "heap_used_delta": 1490944.0,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 4400.5,
+            "wall_ns": 1058145.5,
+            "rss": 17736340.0,
+            "heap_used_delta": 1327104.0,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.796652558676414,
+                0.9669945355191257,
+                1.357410696664693,
+                0.8261308562197092,
+                0.9191855583543241,
+                1.0194594594594595,
+                0.9501504082509669,
+                0.8887306753458096,
+                0.911296738265712,
+                0.9453376205787781
+              ],
+              "median_reduction_percent": 6.773841053344887,
+              "wins": 8,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9346001989609816,
+                0.9339956018366503,
+                1.4049659637297784,
+                0.9368538869457295,
+                0.9671037757178386,
+                0.963702502329549,
+                0.8850473574774685,
+                1.0271525357550868,
+                0.932822678498784,
+                0.9955742057847321
+              ],
+              "median_reduction_percent": 4.9721805362360705,
+              "wins": 8,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 8551.5,
+            "wall_ns": 7474583.0,
+            "rss": 11051668.0,
+            "heap_used_delta": 1108992.0,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 9057.0,
+            "wall_ns": 7882187.5,
+            "rss": 12026528.0,
+            "heap_used_delta": 1158144.0,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.0522088353413654,
+                1.0433450584364008,
+                1.0524687685901248,
+                1.0474330998047547,
+                1.052289128120194,
+                1.0593943645504502,
+                1.0600165074873247,
+                1.123746581586144,
+                1.0755555555555556,
+                1.05316426244765
+              ],
+              "median_reduction_percent": -5.281651551888755,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.0384172951459165,
+                1.0946228535426878,
+                1.0499761012014146,
+                1.109090896992281,
+                1.061574463193691,
+                1.0562326734846628,
+                1.0404912678033227,
+                1.1618536118220093,
+                1.0634262306384725,
+                1.0657787704959643
+              ],
+              "median_reduction_percent": -6.250034691608164,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 1539514.5,
+            "wall_ns": 1110881437.5,
+            "rss": 43860736.0,
+            "heap_used_delta": 2950368.5,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 1424359.5,
+            "wall_ns": 1035302708.5,
+            "rss": 44090076.0,
+            "heap_used_delta": 1780827.5,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9189010599880405,
+                0.9216653931741661,
+                0.9237523815674751,
+                0.9183607644736927,
+                0.9209732944328257,
+                0.9357977575184641,
+                0.9724538059668222,
+                0.9163882688512093,
+                0.97049255465861,
+                0.9110230946584746
+              ],
+              "median_reduction_percent": 7.868065619650411,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9376931634718135,
+                0.9293649691925369,
+                0.9533081982485434,
+                0.9201584585659641,
+                0.9367949885642108,
+                0.9400852577160228,
+                1.0147134998282605,
+                0.9291502319413255,
+                0.9555275337209372,
+                0.9148834124072066
+              ],
+              "median_reduction_percent": 6.275592398198782,
+              "wins": 9,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 416314.5,
+            "wall_ns": 265477187.5,
+            "rss": 46564048.0,
+            "heap_used_delta": 196841.0,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 378300.0,
+            "wall_ns": 248795854.0,
+            "rss": 45531856.0,
+            "heap_used_delta": 2661351.0,
+            "samples": 10,
+            "requests": 4188,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9050579157989693,
+                0.9189100048630404,
+                0.9217536763177395,
+                0.8756055429185979,
+                0.8963534439428883,
+                0.940867654240599,
+                0.9534228917337512,
+                0.9825710327348726,
+                0.9517120787538665,
+                0.9297970808116768
+              ],
+              "median_reduction_percent": 7.422462143529184,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9324153199826837,
+                0.9374083131876217,
+                0.9601953315358179,
+                0.9192751784350298,
+                0.925426653536413,
+                0.9570163242795695,
+                0.9489206386413338,
+                1.0350419015422712,
+                0.9441828664916537,
+                0.9398631459092723
+              ],
+              "median_reduction_percent": 5.797699379953691,
+              "wins": 9,
+              "pairs": 10
+            }
+          }
+        }
+      },
+      "numerical": {
+        "first": {
+          "baseline": {
+            "cpu_us": 17996.5,
+            "wall_ns": 4127479.0,
+            "rss": 25895632.0,
+            "heap_used_delta": -396835.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 17178.5,
+            "wall_ns": 3990729.0,
+            "rss": 28320464.0,
+            "heap_used_delta": -274730.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9814526812971603,
+                0.8865939204988309,
+                0.889957676029242,
+                1.0403392289237292,
+                1.004381343242194,
+                1.0126612235238432,
+                0.9266687723731312,
+                0.9647403963245876,
+                0.8983314555501904,
+                1.07527753523762
+              ],
+              "median_reduction_percent": 2.690346118912601,
+              "wins": 6,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.005359993688509,
+                0.9166194541013761,
+                0.9269700906247975,
+                0.8857612167004618,
+                0.987198199841878,
+                1.0086517878153036,
+                0.9126034520754476,
+                1.0118418717745628,
+                0.9180269589690416,
+                0.9970147795591182
+              ],
+              "median_reduction_percent": 4.291585476666226,
+              "wins": 7,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 8737.5,
+            "wall_ns": 7637542.0,
+            "rss": 11338376.0,
+            "heap_used_delta": 1125376.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 9867.5,
+            "wall_ns": 8714875.5,
+            "rss": 12321464.0,
+            "heap_used_delta": 1207296.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.163945895522388,
+                1.1317891373801916,
+                1.1238215681765924,
+                1.0801167693804736,
+                1.1428409862022166,
+                1.130988548726338,
+                1.0674765323025952,
+                1.1423251483765855,
+                1.1023917995444192,
+                1.1752956032602457
+              ],
+              "median_reduction_percent": -13.138884305326481,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.182215074298685,
+                1.2009041311553,
+                1.1126058492352149,
+                1.1053085360005515,
+                1.2245845994417424,
+                1.1510312771279296,
+                1.0420079281264827,
+                1.1385741135697147,
+                1.0623325836920903,
+                1.1589109791406518
+              ],
+              "median_reduction_percent": -14.480269534882218,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 6448577.5,
+            "wall_ns": 5396441645.5,
+            "rss": 36274908.0,
+            "heap_used_delta": 2333650.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 2517725.5,
+            "wall_ns": 2091654520.5,
+            "rss": 40092392.0,
+            "heap_used_delta": 8447182.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.38172503210270925,
+                0.4055919747766432,
+                0.39244427756958467,
+                0.42666329619318644,
+                0.386803033478344,
+                0.3876470031551595,
+                0.39618558238535856,
+                0.363041968001784,
+                0.38647617094768116,
+                0.39590824007033004
+              ],
+              "median_reduction_percent": 60.99543596376279,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.3690736101498995,
+                0.39560470477081416,
+                0.3889821255875794,
+                0.42779639926079954,
+                0.3771426706605711,
+                0.3879970097755979,
+                0.3944690077679037,
+                0.35693079490067575,
+                0.38558324738539784,
+                0.3880935332730834
+              ],
+              "median_reduction_percent": 61.19547284756594,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 1464351.0,
+            "wall_ns": 1159315292.0,
+            "rss": 30106308.0,
+            "heap_used_delta": 3968887.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 711817.5,
+            "wall_ns": 489338875.0,
+            "rss": 37094120.0,
+            "heap_used_delta": 2308335.0,
+            "samples": 10,
+            "requests": 4107,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.5073641442356526,
+                0.49225438795199794,
+                0.49805127009726446,
+                0.4808119618240808,
+                0.5094246101593721,
+                0.4910248008889377,
+                0.5001108320039177,
+                0.45237244549707933,
+                0.47341804855177166,
+                0.4826534724550513
+              ],
+              "median_reduction_percent": 50.83604055795322,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.4228759296443937,
+                0.42638386617529855,
+                0.4229960948306029,
+                0.4138357683646268,
+                0.43228868452750074,
+                0.4242065038665009,
+                0.4358738642161599,
+                0.38086333787473864,
+                0.418308172424397,
+                0.41499175962468693
+              ],
+              "median_reduction_percent": 57.70639877625017,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      },
+      "parser": {
+        "first": {
+          "baseline": {
+            "cpu_us": 61854.5,
+            "wall_ns": 17512708.0,
+            "rss": 54649600.0,
+            "heap_used_delta": 1850140.0,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 67138.0,
+            "wall_ns": 21499062.5,
+            "rss": 65889036.0,
+            "heap_used_delta": 2389916.0,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.0007661706203035,
+                1.070306756666444,
+                1.2916167361474455,
+                1.2766160831640578,
+                1.0207417478661531,
+                1.0089042641197263,
+                1.1502510349687307,
+                1.037283685786095,
+                0.9672314107234201,
+                1.0972698474902844
+              ],
+              "median_reduction_percent": -5.379522122626934,
+              "wins": 1,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.1346921426816228,
+                1.2222522089019114,
+                1.5993878343399481,
+                1.3550859775800266,
+                1.130688622248236,
+                1.18953183810325,
+                1.2911575125189458,
+                0.7961656705117268,
+                1.1616663094164992,
+                1.2427543382951722
+              ],
+              "median_reduction_percent": -20.589202350258073,
+              "wins": 1,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 17801.5,
+            "wall_ns": 15904458.5,
+            "rss": 17081004.0,
+            "heap_used_delta": 1835008.0,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 21472.5,
+            "wall_ns": 19112875.0,
+            "rss": 19530400.0,
+            "heap_used_delta": 1835008.0,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.1992848762500699,
+                1.2419121476937323,
+                1.322925812115891,
+                1.247787610619469,
+                1.2488057788651987,
+                1.2353731168982833,
+                1.2206845910528694,
+                1.177705888803597,
+                1.1822594142259415,
+                1.1576386289503235
+              ],
+              "median_reduction_percent": -22.802885397557638,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.1369779531057511,
+                1.2606171530791401,
+                1.3046728439355502,
+                1.2575141030154662,
+                1.330686971688028,
+                1.2522426188925457,
+                1.1296053638336798,
+                1.197125004745775,
+                1.1524726710692708,
+                1.2317961628337695
+              ],
+              "median_reduction_percent": -24.20193908631576,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 2011176.0,
+            "wall_ns": 1842003458.5,
+            "rss": 77087668.0,
+            "heap_used_delta": 10537519.0,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 1160641.0,
+            "wall_ns": 959931271.0,
+            "rss": 80397176.0,
+            "heap_used_delta": 3581193.5,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.602544376137769,
+                0.5730090548861683,
+                0.6260053043818392,
+                0.531186172060072,
+                0.5661812124087203,
+                0.5838324286226553,
+                0.5698374479125717,
+                0.5772169033459683,
+                0.5844800138467081,
+                0.5758486911183436
+              ],
+              "median_reduction_percent": 42.34672027678441,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.5234573898070959,
+                0.5172004601429196,
+                0.5535272353638696,
+                0.47172454301386807,
+                0.514625638890218,
+                0.527185268581911,
+                0.5181987243461298,
+                0.5210341016230661,
+                0.5278895225641085,
+                0.5221908785765278
+              ],
+              "median_reduction_percent": 47.83875099002031,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 5148221.0,
+            "wall_ns": 2955704916.5,
+            "rss": 77177780.0,
+            "heap_used_delta": 12936789.0,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 2885428.0,
+            "wall_ns": 1657782709.0,
+            "rss": 84009812.0,
+            "heap_used_delta": 10544278.5,
+            "samples": 10,
+            "requests": 716,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.6241698140529437,
+                0.5457520178479941,
+                0.5844941473800881,
+                0.5374414055099067,
+                0.6085091939422551,
+                0.5615330354040504,
+                0.5947099430001689,
+                0.5609660809574719,
+                0.5440501298297433,
+                0.6011553688375922
+              ],
+              "median_reduction_percent": 42.69864086079307,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.5804446788439547,
+                0.5449476021164344,
+                0.5887768451035842,
+                0.5346007797301604,
+                0.5842168588438441,
+                0.563617113392186,
+                0.5854281607058509,
+                0.5614457727678761,
+                0.549338528653834,
+                0.576289134564531
+              ],
+              "median_reduction_percent": 43.00468760216415,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      },
+      "rules": {
+        "first": {
+          "baseline": {
+            "cpu_us": 5720.0,
+            "wall_ns": 2559937.5,
+            "rss": 15868612.0,
+            "heap_used_delta": 786432.0,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 6044.0,
+            "wall_ns": 2706437.5,
+            "rss": 15876816.0,
+            "heap_used_delta": 589824.0,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9914459615068267,
+                1.022682970051391,
+                1.0213100436681222,
+                0.9391076115485564,
+                1.0246830092983938,
+                1.1839665515360844,
+                0.8666866387058119,
+                0.9531465319246669,
+                1.1118560338743826,
+                1.1236578382247673
+              ],
+              "median_reduction_percent": -2.1996506859756515,
+              "wins": 4,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.0490406794814484,
+                1.0716237736191496,
+                1.0566621969177312,
+                1.0765603733229632,
+                1.0709895172515735,
+                1.1246187343033107,
+                0.8346803052225886,
+                0.9411642580190341,
+                1.0687202629126404,
+                1.0676787839955963
+              ],
+              "median_reduction_percent": -6.819952345411839,
+              "wins": 2,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 9530.0,
+            "wall_ns": 8191229.0,
+            "rss": 11993784.0,
+            "heap_used_delta": 1215488.0,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 10071.0,
+            "wall_ns": 8831145.5,
+            "rss": 12305080.0,
+            "heap_used_delta": 1272832.0,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.063235608816606,
+                1.0781485468245424,
+                1.0495504913234373,
+                1.101049317943337,
+                1.0392774627179164,
+                1.067890870933893,
+                0.9629211368341803,
+                0.9419727375993941,
+                1.0724668435013263,
+                1.0524012918012293
+              ],
+              "median_reduction_percent": -5.7818450308917635,
+              "wins": 2,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.916932422798394,
+                1.099525315598273,
+                1.0701402270951406,
+                1.0585705798787264,
+                1.0617008748880115,
+                1.147190393563259,
+                0.9706218004420727,
+                0.9551243259235351,
+                1.0537965294961307,
+                1.1247490459916323
+              ],
+              "median_reduction_percent": -6.013572738336892,
+              "wins": 3,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 1196161.0,
+            "wall_ns": 726508500.0,
+            "rss": 64684884.0,
+            "heap_used_delta": 2976129.0,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 1017044.5,
+            "wall_ns": 642076833.5,
+            "rss": 63177532.0,
+            "heap_used_delta": -464222.5,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9348004522015286,
+                0.8831928268181543,
+                0.8285409531537442,
+                0.854118398843747,
+                0.8755616769770354,
+                0.8367554218049785,
+                0.8452298585485855,
+                0.8703189033868765,
+                0.8484910333283023,
+                0.7842131321541893
+              ],
+              "median_reduction_percent": 14.869528391397536,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9230961056688008,
+                0.9090970002098105,
+                0.8803220739029071,
+                0.8933571162635389,
+                0.89377539853076,
+                0.8855563106812726,
+                0.8125015377180334,
+                0.8521788043763281,
+                0.8809709345410768,
+                0.8430103356827772
+              ],
+              "median_reduction_percent": 11.673637738882526,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 783379.5,
+            "wall_ns": 313187729.0,
+            "rss": 147850056.0,
+            "heap_used_delta": 5375601.0,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "candidate": {
+            "cpu_us": 688777.0,
+            "wall_ns": 268699187.5,
+            "rss": 150979388.0,
+            "heap_used_delta": 8556222.5,
+            "samples": 10,
+            "requests": 4260,
+            "gc_available": false,
+            "gc_count": null,
+            "gc_ms": null
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9928679969869681,
+                0.9415740123443515,
+                0.895909696929649,
+                0.8757066411055678,
+                0.8340133268221988,
+                0.9240456036148879,
+                0.8337359136626147,
+                0.7820156498661645,
+                0.8603659444866424,
+                0.7365062860383779
+              ],
+              "median_reduction_percent": 13.196370720389483,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9306369752317202,
+                0.912726456426751,
+                0.8663094229274909,
+                0.8891351281804347,
+                0.7610014246050949,
+                0.9013875937834372,
+                0.7485886274607071,
+                0.7010506365572784,
+                0.8620651991414857,
+                0.7575324073772642
+              ],
+              "median_reduction_percent": 13.581268896551169,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      }
+    },
+    "node": {
+      "lists": {
+        "first": {
+          "baseline": {
+            "cpu_us": 3567.5,
+            "wall_ns": 1498979.5,
+            "rss": 46702592.0,
+            "heap_used_delta": 1086840.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.18529146909713745
+          },
+          "candidate": {
+            "cpu_us": 3591.5,
+            "wall_ns": 1523625.0,
+            "rss": 46735360.0,
+            "heap_used_delta": 954576.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.2011454701423645
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9937659393595919,
+                0.9824561403508771,
+                1.0348510399100619,
+                0.9906937394247038,
+                0.9707194645844952,
+                1.0033416875522139,
+                1.025648332858364,
+                0.9574926015603982,
+                1.0522746538570218,
+                1.0612244897959184
+              ],
+              "median_reduction_percent": 0.14461865440971167,
+              "wins": 5,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9784013938438563,
+                1.0091614173636911,
+                1.0352853474695602,
+                1.0181215488985134,
+                0.9904842523719051,
+                1.0181456624409644,
+                1.0297248956647644,
+                0.994637620444072,
+                1.0538889639371538,
+                1.0600895100241245
+              ],
+              "median_reduction_percent": -1.8133605669738984,
+              "wins": 3,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 3818.5,
+            "wall_ns": 3760896.0,
+            "rss": 40173568.0,
+            "heap_used_delta": 425936.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.24512499570846558
+          },
+          "candidate": {
+            "cpu_us": 4177.5,
+            "wall_ns": 4175125.0,
+            "rss": 40345600.0,
+            "heap_used_delta": 509020.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.2532085180282593
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.1219445953286258,
+                1.121461657231086,
+                1.1043522524815474,
+                1.0729327170005136,
+                1.085531574740208,
+                1.0940282870612887,
+                1.1217183770883055,
+                1.0887666928515318,
+                1.1076923076923078,
+                1.0636732623033993
+              ],
+              "median_reduction_percent": -9.91902697714182,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.125326552648995,
+                1.111577034568422,
+                1.0994605770573325,
+                1.0751849804645692,
+                1.1230502353380976,
+                1.0860070565541464,
+                1.1252386359348734,
+                1.0942468293538137,
+                1.1407545243136077,
+                1.0557077460266138
+              ],
+              "median_reduction_percent": -10.551880581287731,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 1889991.0,
+            "wall_ns": 1880575417.0,
+            "rss": 84803584.0,
+            "heap_used_delta": -1554948.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 910.5,
+            "gc_ms": 83.63096678256989
+          },
+          "candidate": {
+            "cpu_us": 1792512.5,
+            "wall_ns": 1779526770.5,
+            "rss": 84516864.0,
+            "heap_used_delta": 8159708.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 871.0,
+            "gc_ms": 78.17490923404694
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9745066692433033,
+                0.9581488937900651,
+                0.9543493744804755,
+                0.9377691924540306,
+                0.9236868346051588,
+                0.9751771578315226,
+                0.960541917715737,
+                0.9444023672484851,
+                0.9345832215656504,
+                0.9287184750675587
+              ],
+              "median_reduction_percent": 5.062412913551961,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9724502947778664,
+                0.9550382741047351,
+                0.952426442003025,
+                0.9355769028236657,
+                0.9217519378104925,
+                0.9730422091802118,
+                0.9584589513261016,
+                0.9426351452191213,
+                0.932981616651814,
+                0.9265331837715381
+              ],
+              "median_reduction_percent": 5.246920638892694,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 274213.0,
+            "wall_ns": 235229250.0,
+            "rss": 84262912.0,
+            "heap_used_delta": 7952808.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 174.0,
+            "gc_ms": 15.488835513591766
+          },
+          "candidate": {
+            "cpu_us": 258172.5,
+            "wall_ns": 222528354.0,
+            "rss": 83656704.0,
+            "heap_used_delta": -554916.0,
+            "samples": 10,
+            "requests": 8497,
+            "gc_available": true,
+            "gc_count": 162.0,
+            "gc_ms": 14.899598717689514
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9704659136672776,
+                0.9630257181564735,
+                0.9319142185494455,
+                0.9323436430121939,
+                0.932851641618455,
+                0.9662298896149804,
+                0.9744963356154055,
+                0.9122292763076181,
+                0.9535569009209017,
+                0.9280756120235513
+              ],
+              "median_reduction_percent": 5.679572873032157,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9734442224294881,
+                0.9781317834873282,
+                0.93025655603155,
+                0.9433882698385245,
+                0.9373269653878696,
+                0.9749375379316046,
+                0.9838174386913519,
+                0.9382037403310812,
+                0.9641084408512642,
+                0.9460727203316202
+              ],
+              "median_reduction_percent": 4.490941940855775,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      },
+      "numerical": {
+        "first": {
+          "baseline": {
+            "cpu_us": 15881.0,
+            "wall_ns": 4950896.0,
+            "rss": 50339840.0,
+            "heap_used_delta": 532532.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 9.0,
+            "gc_ms": 0.6120207905769348
+          },
+          "candidate": {
+            "cpu_us": 12948.0,
+            "wall_ns": 4757937.5,
+            "rss": 50085888.0,
+            "heap_used_delta": 162696.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 5.0,
+            "gc_ms": 0.5250204801559448
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.840891115212233,
+                0.8191242068228938,
+                0.7014150405112405,
+                0.844974335650705,
+                0.7927556730828362,
+                0.833716424771787,
+                0.7672574048828851,
+                0.8574135790367902,
+                0.8807194698643105,
+                0.7730504587155963
+              ],
+              "median_reduction_percent": 17.357968420265955,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9847160442743353,
+                0.953965037064332,
+                0.8517194301444122,
+                0.9899169178887129,
+                0.90911362189565,
+                0.9424950774978543,
+                0.9551209190952956,
+                1.0072156086378912,
+                1.1584913452154708,
+                0.8575544753100429
+              ],
+              "median_reduction_percent": 4.545702192018619,
+              "wins": 8,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 3829.5,
+            "wall_ns": 3860812.5,
+            "rss": 40140800.0,
+            "heap_used_delta": 441812.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.2516250014305115
+          },
+          "candidate": {
+            "cpu_us": 5263.5,
+            "wall_ns": 5262812.5,
+            "rss": 41074688.0,
+            "heap_used_delta": 488748.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.25983351469039917
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.3509095702610072,
+                1.3554817275747508,
+                1.3370315581854044,
+                1.354898828541001,
+                1.3653697500644164,
+                1.3382045929018789,
+                1.3799947075946017,
+                1.3660830938071598,
+                1.5460614152202938,
+                1.3348089468779123
+              ],
+              "median_reduction_percent": -35.519027805787594,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.3921324874527932,
+                1.3180465211268464,
+                1.3424788005407398,
+                1.366563598305406,
+                1.3657479725599988,
+                1.3640166729703047,
+                1.3902487407199158,
+                1.3622711376788084,
+                1.6208518984677185,
+                1.2550346644775285
+              ],
+              "median_reduction_percent": -36.48823227651516,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 4008630.5,
+            "wall_ns": 4062513208.0,
+            "rss": 87048192.0,
+            "heap_used_delta": 7368084.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 2855.0,
+            "gc_ms": 157.18756240606308
+          },
+          "candidate": {
+            "cpu_us": 1911543.0,
+            "wall_ns": 1909561854.0,
+            "rss": 86712320.0,
+            "heap_used_delta": -3419400.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 1974.0,
+            "gc_ms": 87.5127580165863
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.41506135311485337,
+                0.43477538685344524,
+                0.4867833716801417,
+                0.4875225981239061,
+                0.4589807337432584,
+                0.4715961327587463,
+                0.4390737734881877,
+                0.47264642664845213,
+                0.46597179860994986,
+                0.4701858966125247
+              ],
+              "median_reduction_percent": 53.19211523887627,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.41304376377725244,
+                0.43389276345712574,
+                0.4841476894966222,
+                0.48527375266071304,
+                0.4567222037912683,
+                0.46070465751833045,
+                0.43662378025343196,
+                0.47058590032922504,
+                0.45670586682434183,
+                0.47744353172677734
+              ],
+              "median_reduction_percent": 54.12865693452006,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 1211225.5,
+            "wall_ns": 1201620499.5,
+            "rss": 69361664.0,
+            "heap_used_delta": 5266644.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 2342.0,
+            "gc_ms": 96.10150772333145
+          },
+          "candidate": {
+            "cpu_us": 605243.0,
+            "wall_ns": 584304708.5,
+            "rss": 69345280.0,
+            "heap_used_delta": 6453316.0,
+            "samples": 10,
+            "requests": 3489,
+            "gc_available": true,
+            "gc_count": 1270.0,
+            "gc_ms": 50.716780841350555
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.4338293417254154,
+                0.44915677717226893,
+                0.5128680175107325,
+                0.505631491302804,
+                0.47774222826249385,
+                0.49909307418966714,
+                0.45973603737379903,
+                0.511987992129977,
+                0.5039948824868828,
+                0.4854849724212975
+              ],
+              "median_reduction_percent": 50.77109766945177,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.42067871531883433,
+                0.4362851587991664,
+                0.4991419252351394,
+                0.4919189659062658,
+                0.46519454721589076,
+                0.48567841667289247,
+                0.44582257997044406,
+                0.4987792049115612,
+                0.4944322640977802,
+                0.461622923416722
+              ],
+              "median_reduction_percent": 52.45635180556084,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      },
+      "parser": {
+        "first": {
+          "baseline": {
+            "cpu_us": 23667.0,
+            "wall_ns": 12570916.5,
+            "rss": 56860672.0,
+            "heap_used_delta": 2289696.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 13.0,
+            "gc_ms": 0.9787070155143738
+          },
+          "candidate": {
+            "cpu_us": 24448.5,
+            "wall_ns": 14452041.5,
+            "rss": 62496768.0,
+            "heap_used_delta": 1021848.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 7.0,
+            "gc_ms": 0.6298120617866516
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.0234978180597516,
+                1.0201375859912445,
+                1.0302147951217453,
+                1.04675047943746,
+                1.0334364537864982,
+                0.960567945057489,
+                1.0284300038075898,
+                1.053008227631128,
+                1.0492784380305602,
+                0.9981613140475607
+              ],
+              "median_reduction_percent": -2.9322399464667637,
+              "wins": 2,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.1324438113956863,
+                1.1469335259206306,
+                1.156491602494777,
+                1.165348056902275,
+                1.13815861733852,
+                1.0842877821184076,
+                1.1419391490420503,
+                1.1674896807481459,
+                1.1914421071954167,
+                1.1183524004382945
+              ],
+              "median_reduction_percent": -14.443633748134044,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 18182.5,
+            "wall_ns": 16950333.0,
+            "rss": 52387840.0,
+            "heap_used_delta": 2049596.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 2.0,
+            "gc_ms": 0.514020562171936
+          },
+          "candidate": {
+            "cpu_us": 26117.5,
+            "wall_ns": 24751958.5,
+            "rss": 57491456.0,
+            "heap_used_delta": 2757900.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 2.0,
+            "gc_ms": 0.5177494287490845
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.4120292603630453,
+                1.4567092477344687,
+                1.4337779762236982,
+                1.462974145029368,
+                1.420359612724758,
+                1.3188313905282154,
+                1.4741799831791422,
+                1.4435762919968746,
+                1.4423627947983249,
+                1.3692478578229133
+              ],
+              "median_reduction_percent": -43.80703855110115,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.4516946296261126,
+                1.495409927219633,
+                1.4770931720894644,
+                1.5167808594146017,
+                1.4626723542577342,
+                1.3730465870625594,
+                1.596300464064267,
+                1.4892530307907543,
+                1.451852976965924,
+                1.33857594450506
+              ],
+              "median_reduction_percent": -46.98827631735993,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 2533119.5,
+            "wall_ns": 2559118021.0,
+            "rss": 124846080.0,
+            "heap_used_delta": 14365760.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 1474.0,
+            "gc_ms": 116.35449635982513
+          },
+          "candidate": {
+            "cpu_us": 1783879.0,
+            "wall_ns": 1785934062.5,
+            "rss": 143286272.0,
+            "heap_used_delta": -3788380.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 698.5,
+            "gc_ms": 53.77289628982544
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.6811363860950537,
+                0.694432239130211,
+                0.7059319236147621,
+                0.6999973871402964,
+                0.6932665802079336,
+                0.7614550828701634,
+                0.6874269546378149,
+                0.7211942349998529,
+                0.7037008188379703,
+                0.7246858276204545
+              ],
+              "median_reduction_percent": 29.815089701086663,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.6789053525807752,
+                0.6920082527136923,
+                0.7035641588706348,
+                0.6874259024036105,
+                0.6912065169030663,
+                0.7871877930756259,
+                0.6765600868587063,
+                0.7187916940869908,
+                0.7012748879210708,
+                0.7383225170227704
+              ],
+              "median_reduction_percent": 30.33584296826184,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 1879326.5,
+            "wall_ns": 1561804521.0,
+            "rss": 117702656.0,
+            "heap_used_delta": 9122392.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 1202.0,
+            "gc_ms": 89.11287099123001
+          },
+          "candidate": {
+            "cpu_us": 1739706.5,
+            "wall_ns": 1149847667.0,
+            "rss": 143122432.0,
+            "heap_used_delta": 15904128.0,
+            "samples": 10,
+            "requests": 1718,
+            "gc_available": true,
+            "gc_count": 636.5,
+            "gc_ms": 54.14210832118988
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.904527619365567,
+                0.9099634393581316,
+                0.9142537918382149,
+                0.9309965545156418,
+                0.9316350529852756,
+                0.9225955372071952,
+                0.8976956741272106,
+                0.9443377871693446,
+                0.9277253854409967,
+                0.9624357348000747
+              ],
+              "median_reduction_percent": 7.483953867590398,
+              "wins": 10,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.716415656798369,
+                0.7180803157452945,
+                0.7268040916337407,
+                0.741040295872455,
+                0.7400002694020076,
+                0.7372083625215147,
+                0.6939963955439926,
+                0.7540662667014083,
+                0.7410071794159065,
+                0.8227368758569126
+              ],
+              "median_reduction_percent": 26.139568403823887,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      },
+      "rules": {
+        "first": {
+          "baseline": {
+            "cpu_us": 2717.5,
+            "wall_ns": 2341854.0,
+            "rss": 44023808.0,
+            "heap_used_delta": 178284.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 2.0,
+            "gc_ms": 0.36285459995269775
+          },
+          "candidate": {
+            "cpu_us": 2660.0,
+            "wall_ns": 2417000.0,
+            "rss": 43999232.0,
+            "heap_used_delta": 54544.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 2.0,
+            "gc_ms": 0.3699995279312134
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9324122479462286,
+                0.895722870272181,
+                0.9391304347826087,
+                1.0509383378016086,
+                0.9966355140186915,
+                0.9921537857983523,
+                0.9752457226064798,
+                0.9996279761904762,
+                0.9790764790764791,
+                0.9064207650273224
+              ],
+              "median_reduction_percent": 2.2838899158520554,
+              "wins": 9,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9947513710159093,
+                0.9509004390891453,
+                0.9920774972208989,
+                1.086268143924867,
+                1.0409252247632015,
+                1.0405843565083275,
+                1.007749658992486,
+                1.0587171921349008,
+                1.041838270954138,
+                0.9765290164200412
+              ],
+              "median_reduction_percent": -2.416700775040681,
+              "wins": 4,
+              "pairs": 10
+            }
+          }
+        },
+        "import": {
+          "baseline": {
+            "cpu_us": 4424.5,
+            "wall_ns": 4319438.0,
+            "rss": 40697856.0,
+            "heap_used_delta": 574252.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.2556040287017822
+          },
+          "candidate": {
+            "cpu_us": 4891.5,
+            "wall_ns": 4795145.5,
+            "rss": 40837120.0,
+            "heap_used_delta": 691092.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 1.0,
+            "gc_ms": 0.25193750858306885
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.1153058903798043,
+                1.1296379079123826,
+                1.073667711598746,
+                1.0505390835579516,
+                1.1050824175824177,
+                1.126269621421976,
+                1.0952490774907748,
+                1.1420363134911515,
+                1.1296214788732395,
+                1.16353591160221
+              ],
+              "median_reduction_percent": -12.07877559008903,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                1.1215543713103084,
+                1.126458556406666,
+                1.0741767665218385,
+                1.0526837010610475,
+                1.1082398051071776,
+                1.1294756090367486,
+                1.0979853773584907,
+                1.1489304846887634,
+                1.1164856963626346,
+                1.1659986368221598
+              ],
+              "median_reduction_percent": -11.902003383647152,
+              "wins": 0,
+              "pairs": 10
+            }
+          }
+        },
+        "persistent": {
+          "baseline": {
+            "cpu_us": 1929917.5,
+            "wall_ns": 1860276687.5,
+            "rss": 87851008.0,
+            "heap_used_delta": 1930360.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 2547.0,
+            "gc_ms": 98.5683199763298
+          },
+          "candidate": {
+            "cpu_us": 1877639.5,
+            "wall_ns": 1795144854.5,
+            "rss": 103571456.0,
+            "heap_used_delta": 8645320.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 1792.0,
+            "gc_ms": 75.58460998535156
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                0.9611520761947063,
+                1.0164823625119148,
+                1.0043008016156483,
+                0.9738366749031715,
+                0.9651790520094258,
+                0.9690128872131977,
+                0.9715972913626739,
+                0.9693002973731012,
+                0.9474976708414516,
+                0.9739962694822845
+              ],
+              "median_reduction_percent": 2.9551205632112443,
+              "wins": 8,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9539708452023128,
+                1.0475741175878868,
+                1.03476967622447,
+                0.967713521334059,
+                0.9580201603681946,
+                0.9629018298011721,
+                0.9672119336916916,
+                0.9617232797605123,
+                0.938787577862443,
+                0.9660526079290898
+              ],
+              "median_reduction_percent": 3.5522781134869064,
+              "wins": 8,
+              "pairs": 10
+            }
+          }
+        },
+        "warmup-1000": {
+          "baseline": {
+            "cpu_us": 249564.0,
+            "wall_ns": 143426750.0,
+            "rss": 70115328.0,
+            "heap_used_delta": 3370076.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 326.0,
+            "gc_ms": 14.92681360244751
+          },
+          "candidate": {
+            "cpu_us": 258163.0,
+            "wall_ns": 137895333.5,
+            "rss": 80707584.0,
+            "heap_used_delta": 5520660.0,
+            "samples": 10,
+            "requests": 16228,
+            "gc_available": true,
+            "gc_count": 205.0,
+            "gc_ms": 11.344145357608795
+          },
+          "paired": {
+            "cpu_us": {
+              "candidate_over_baseline": [
+                1.0355481954588024,
+                1.0299699979142936,
+                1.0450089198180679,
+                1.0409427083752485,
+                1.0228013936173597,
+                1.0264535069245007,
+                1.0499752416978514,
+                1.046254783597265,
+                1.0199754916540753,
+                1.0329549546135042
+              ],
+              "median_reduction_percent": -3.425157503615317,
+              "wins": 0,
+              "pairs": 10
+            },
+            "wall_ns": {
+              "candidate_over_baseline": [
+                0.9558984922803903,
+                0.9482035906958418,
+                0.9855457551164929,
+                0.97481127268994,
+                0.9350143640525093,
+                0.9678080326239256,
+                0.9730857359622425,
+                0.9771923936413902,
+                0.9389649496684351,
+                0.9522683358969276
+              ],
+              "median_reduction_percent": 3.8146737547842147,
+              "wins": 10,
+              "pairs": 10
+            }
+          }
+        }
+      }
+    }
+  }
+}

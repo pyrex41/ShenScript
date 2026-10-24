@@ -14,7 +14,15 @@ An implementation of the [Shen Language](http://www.shenlanguage.org) by [Mark T
   * Allows integration with arbitrary I/O.
   * Async operations are transparent to written Shen code.
   * Easy interop: JS can be called from Shen, Shen can be called from JS.
-  * Fairly small production webpack bundle (\~670KB minified, \~110KB gzip compressed).
+  * Production webpack bundle (current local build: \~833 KiB minified, \~113 KiB gzip compressed).
+
+The local `1.1.0-rc.1` candidate adds explicit AOT performance profiles for
+Yggdrasil/Ratatoskr output. See [build contracts and measured profiles](docs/aot-release.md).
+Ordinary output keeps dynamic behavior; `--sealed`, `--tail-loops` and
+`--adaptive` are deliberate build choices. Adaptive execution can remove
+incidental internal microtask yields while preserving actual async suspension
+and the public Promise API. Bounded checkpoints retain head-recursion stack
+safety. Measure the flags on your application.
 
 ## Prerequisites
 

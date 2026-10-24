@@ -1,13 +1,16 @@
 # ShenScript AOT performance plan
 
-Status: M0 implemented in the release worktree; M1–M6 remain active work.
-See [the baseline report](aot-baseline.md) for current evidence and limits.
+Status: M0–M4 implemented and selected application profiles measured in the
+release worktree; M6 package gates produce the final local candidate. M5 specialization is
+deferred after profiling, pending a separately
+useful callback/storage experiment. See [the release report](aot-release.md)
+and [the baseline report](aot-baseline.md) for evidence and limits.
 Source inspected: `45be974e1f11b7bb0ac102a280a4cd63ac61ff8f`.
 Primary target: complete applications emitted through Yggdrasil/Ratatoskr,
 with the fastest practical JavaScript execution consistent with their declared
 runtime contract. Full interactive-kernel loading is a secondary target.
 
-## Current position
+## Starting position before this plan
 
 ShenScript has the community 43.1/ec16a9f kernel including PR 117, fixed-arity
 wrappers through ten arguments, and the failing-list-equality fix. The macro
@@ -163,6 +166,12 @@ Likely files: `lib/backend.js`, a new analysis module, `bin/yggdrasil-build.js`,
 focused backend/AOT tests and the artifact benchmark harness.
 
 ## M3: infer synchronous chains and handle mixed results
+
+Implementation refinement: unknown JS values and callbacks prevent a general
+no-Promise proof. The implemented explicit adaptive profile guards actual results
+and emits bounded native continuations; public async ABI remains intact. It
+does not claim purity/suspension inference from the call graph. The generator
+alternative was measured and rejected. See [the adaptive contract](aot-adaptive-design.md).
 
 Compute suspension facts to a fixed point over eligible call-graph SCCs. Seed
 from audited primitive/host contracts; unknown callbacks, rebinding, eval and
