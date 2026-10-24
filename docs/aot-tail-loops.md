@@ -24,3 +24,10 @@ are 3.16/0.98/0.18% on Node and 4.30/5.91/−0.45% on Bun. These are exploratory
 not ten-pair independent acceptance. The numerical application loop itself is
 async and is deliberately unchanged; most lowered sites are kernel helpers.
 Combined-profile results and remaining adoption gates are reported separately.
+
+`trace-tail.js` independently instruments the original bounce constructor in
+fresh runtime environments and validates every result. Across ten requests,
+rules drop from 9,080 to 6,740 bounces (25.8%), lists from 27,630 to 22,870
+(17.2%), and numerical remains 31,650. Each bounce constructs a Trampoline;
+this demonstrates fewer allocations of that class, not total allocated bytes.
+No instrumentation runs concurrently with speed measurements.
