@@ -47,18 +47,20 @@ import { analyzeAot } from '../lib/aot-analysis.js';
 import overrides from '../lib/overrides.js';
 import { parseFile } from '../scripts/parser.js';
 import {
-  Arrow, Block, Call, Const, Id, Let, Literal, NewObj, Program, Property, Return, Statement, generate
+  Arrow, Block, Call, Const, Id, Let, Lets, Literal, NewObj, Program, Property, Return, Statement, generate
 } from '../lib/ast.js';
 
 const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed]';
 
-const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed']);
+const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed', '--no-direct']);
 const args = process.argv.slice(2).filter(a => !FLAGS.has(a));
 const linked = process.argv.includes('--linked');
 const web = process.argv.includes('--web');
 const moduleOutput = process.argv.includes('--module');
 const sealed = process.argv.includes('--sealed');
 const analyze = process.argv.includes('--analyze') || sealed;
+const directCalls = sealed && !process.argv.includes('--no-direct');
+if (process.argv.includes('--no-direct') && !sealed) throw new Error('--no-direct requires --sealed');
 
 if (process.argv.includes('-h') || process.argv.includes('--help') || args.length !== 2) {
   console.error(USAGE);
@@ -160,6 +162,7 @@ const parseKl = file => parseFile(fs.readFileSync(path.join(shakenDir, file), 'u
 const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
 const aot = analyze ? analyzeAot([...kernelForms, ...userForms.flatMap(x => x.forms)], { nativeNames: defined }) : null;
+if (aot) { aot.directCalls = directCalls; aot.emitted = { headCalls: 0, workers: 0 }; }
 const $ = backend(sealed ? { aotAnalysis: aot } : {});
 const { assemble, construct, isArray, s } = $;
 
@@ -193,6 +196,7 @@ const program = generate(Program([
     [Id('$')],
     Block(
       Let(Id('w$')), // maybe-await slot for top-level forms (see lib/backend.js)
+      ...(directCalls && aot.workers.size ? [Lets([...aot.workers.values()].map(Id))] : []),
       ...Object.entries(body.subs).map(([key, value]) => Const(Id(key), value)),
       ...body.ast.body,
       Return(Id('$'))),
@@ -279,7 +283,7 @@ $.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(c
 export default $;
 `;
 
-if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, ...aot.report }, null, 2) + '\n');
+if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, directCalls, emitted: aot.emitted, ...aot.report }, null, 2) + '\n');
 
 let artifact;
 
