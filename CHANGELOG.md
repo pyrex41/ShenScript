@@ -1,6 +1,6 @@
 # Fork changelog
 
-## 1.1.0-rc.1 — local release candidate
+## 1.1.0-rc.1 — prerelease
 
 - Authenticate Yggdrasil application artifacts against community ShenOSKernel
   43.1/ec16a9f, including PR 117, and retain complete result validation and
@@ -21,4 +21,10 @@
 
 Ordinary builds retain dynamic calling behavior. Consult
 [the release report](docs/aot-release.md) before choosing an optimized profile.
-This candidate has not been published to a registry or tagged as a release.
+Distribution uses the GitHub prerelease archive on the pyrex41 fork. npm
+registry publication is separate.
+
+The complete 154-test certification suite is distinct from the AOT application
+benchmarks. Three fresh serial samples on the shared host measured ordinary
+suite wall medians of 5.82 s on Node and 7.33 s on Bun; the full adaptive kernel
+measured 7.65/8.41 s. This release makes no full-suite adaptive speedup claim.

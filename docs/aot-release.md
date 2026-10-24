@@ -1,9 +1,9 @@
 # ShenScript 1.1.0-rc.1 candidate
 
-Local prerelease candidate with explicit AOT performance profiles. Source
+Prerelease with explicit AOT performance profiles. Source
 correctness and paired application checks pass on the recorded runtimes.
-Publication, remote CI, quiet-host replication and browser/Deno adaptive
-qualification remain separate gates.
+Release CI and archive status are recorded on the GitHub release. Quiet-host
+replication and browser/Deno adaptive qualification remain separate gates.
 
 ## Source and contracts
 
@@ -146,8 +146,8 @@ Local Node 20.20.2, 22.23.3, 24.22.1 and Bun 1.4.3 pass 601 port tests, includin
 compilation: 154 kernel, 123 extension and 29 benchmark checks pass on all four
 runtimes. Self-contained, linked and browser-safe source modes, real suspension,
 thenables, rebinding and linked future eval pass. Real browser-engine execution
-and Deno adaptive execution remain unqualified. Remote Linux CI is wired but
-has not run for this unpublished branch.
+and Deno adaptive execution remain unqualified. Remote Linux CI runs on the release commit; its status is recorded in the
+GitHub release notes.
 
 The package validator creates a canonical temporary consumer outside the
 checkout and clears NODE_PATH, preventing workspace dependency fallback. It
@@ -189,3 +189,24 @@ advisory. This validates builds, not browser performance.
   need separate semantic/application evidence. M5 is deferred.
 - Quiet-host replication, actual browser/Deno adaptive qualification and remote
   CI remain open. Ordinary output keeps its existing dynamic convention.
+
+## Complete certification suite timing
+
+A fresh check at code commit `62db70a` ran the complete 154-test community suite
+in twelve serial processes: three per engine/profile, alternating run order.
+All processes passed 154/154 with zero failures. Median wall times exclude
+kernel initialization:
+
+| Full-kernel profile | Node 22.23.3 | Bun 1.4.3 |
+|---|---:|---:|
+| Ordinary/default | 5.818 s | 7.332 s |
+| Adaptive | 7.651 s | 8.409 s |
+
+Median ordinary process wall times including startup were 6.052/8.230 s.
+Ordinary suite CPU medians were 11.501/14.003 s; adaptive medians were
+17.492/16.426 s. Process CPU includes worker threads and can exceed wall time.
+Host load changed from 9.44/6.11/4.29 to 10.20/7.70/5.15, so these are
+exploratory status measurements. Full adaptive execution is slower here; the
+AOT application improvements above must not be applied to the whole suite.
+Raw receipts: `_build/performance/aot/suite-times-1792845501331832000/`.
+The release attaches the portable timing summary separately from the package.

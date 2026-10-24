@@ -16,7 +16,7 @@ An implementation of the [Shen Language](http://www.shenlanguage.org) by [Mark T
   * Easy interop: JS can be called from Shen, Shen can be called from JS.
   * Production webpack bundle (current local build: \~833 KiB minified, \~113 KiB gzip compressed).
 
-The local `1.1.0-rc.1` candidate adds explicit AOT performance profiles for
+The `1.1.0-rc.1` prerelease adds explicit AOT performance profiles for
 Yggdrasil/Ratatoskr output. See [build contracts and measured profiles](docs/aot-release.md).
 Ordinary output keeps dynamic behavior; `--sealed`, `--tail-loops` and
 `--adaptive` are deliberate build choices. Adaptive execution can remove
