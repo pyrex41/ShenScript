@@ -44,7 +44,7 @@ for (const mode of ['self', 'linked', 'web']) {
     try { $.lookup('low').f = x => x; } catch { rejected++; }
     try { $.globals.delete('low'); } catch { rejected++; }
     assert(rejected === 3, 'binding guard'); console.log('SEALED_PASS');`;
-  for (const engine of ['node', 'bun']) assert.equal(run(mode + '-' + engine, ['--input-type=module', '-e', code], engine).stdout, 'SEALED_PASS\n');
+  for (const engine of (process.env.AOT_TEST_ENGINES || 'node,bun').split(',')) assert.equal(run(mode + '-' + engine, ['--input-type=module', '-e', code], engine).stdout, 'SEALED_PASS\n');
 }
 fs.writeFileSync(path.join(shake, 'yggdrasil.manifest.txt'), manifest.replace('needs-eval=false', 'needs-eval=true'));
 run('eval-refusal', [builder, shake, path.join(out, 'refused.mjs'), '--sealed', '--linked'], process.execPath, 1);

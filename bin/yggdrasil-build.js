@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Ratatoskr stage-2 builder for ShenScript.
 //
-//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]]
+//   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]] [--adaptive]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
 // kernel (kernel.kl, Shen 42.x or 43.1 defuns in load order), the user
@@ -45,21 +45,24 @@ import { fileURLToPath } from 'node:url';
 import backend from '../lib/backend.js';
 import { analyzeAot } from '../lib/aot-analysis.js';
 import lowerTail from '../lib/aot-tail.js';
+import lowerAdaptive, { pruneAdaptiveCalls } from '../lib/aot-adaptive.js';
+import platformConfig from '../lib/config.js';
 import overrides from '../lib/overrides.js';
 import { parseFile } from '../scripts/parser.js';
 import {
   Arrow, Block, Call, Const, Id, Let, Lets, Literal, NewObj, Program, Property, Return, Statement, generate
 } from '../lib/ast.js';
 
-const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]]';
+const USAGE = 'usage: node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]] [--adaptive]';
 
-const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed', '--no-direct', '--tail-loops']);
+const FLAGS = new Set(['--linked', '--web', '--module', '--analyze', '--sealed', '--no-direct', '--tail-loops', '--adaptive']);
 const args = process.argv.slice(2).filter(a => !FLAGS.has(a));
 const linked = process.argv.includes('--linked');
 const web = process.argv.includes('--web');
 const moduleOutput = process.argv.includes('--module');
 const sealed = process.argv.includes('--sealed');
-const analyze = process.argv.includes('--analyze') || sealed;
+const adaptive = process.argv.includes('--adaptive'), adaptiveStats = {};
+const analyze = adaptive || process.argv.includes('--analyze') || sealed;
 const tailLoops = process.argv.includes('--tail-loops');
 if (tailLoops && !sealed) throw new Error('--tail-loops requires --sealed');
 const directCalls = sealed && !process.argv.includes('--no-direct');
@@ -166,7 +169,7 @@ const kernelForms = parseKl(manifest.kernel);
 const userForms = manifest.user.map(file => ({ file, forms: parseKl(file) }));
 const aot = analyze ? analyzeAot([...kernelForms, ...userForms.flatMap(x => x.forms)], { nativeNames: defined }) : null;
 if (aot) { aot.directCalls = directCalls; aot.emitted = { headCalls: 0, workers: 0 }; }
-const $ = backend(sealed ? { aotAnalysis: aot, ...(tailLoops ? { aotTail: lowerTail } : {}) } : {});
+const $ = backend({ ...(sealed ? { aotAnalysis: aot } : {}), ...(tailLoops ? { aotTail: lowerTail } : {}), ...(adaptive ? { aotAdaptive: lowerAdaptive, aotStats: adaptiveStats } : {}) });
 const { assemble, construct, isArray, s } = $;
 
 // Call the manifest's init function (e.g. shen.initialise) only if the shaken
@@ -193,6 +196,8 @@ const body = assemble(
   Call(Id('overrides'), [Id('$'), NewObj([Property(Id('nativeDict'), Literal(nativeDict))])]),
   ...(initDefined ? [assemble(Statement, construct([s`${manifest.init}`]))] : []),
   ...userForms.flatMap(({ forms }) => forms.filter(isArray).map(construct)));
+
+if (adaptive) pruneAdaptiveCalls(body.ast, adaptiveStats);
 
 const program = generate(Program([
   Const(Id('run'), Arrow(
@@ -233,20 +238,20 @@ const platform = {
   implementation: isDeno ? 'Deno' : isBun ? 'Bun' : 'Node.js',
   release: isDeno ? Deno.version.deno : isBun ? process.versions.bun : process.version.slice(1),
   os: /win32|win64/i.test(process.platform) ? 'Windows' : /darwin|mac/i.test(process.platform) ? 'macOS' : 'Linux',
-  port: '${process.env.npm_package_version || '1.0.0'}',
+  port: '${platformConfig.port}',
   porters: 'Robert Koeninger'
 };
 `;
 
-const sealBoot = sealed ? 'installAotSealing($);' : '';
+const sealBoot = [sealed ? 'installAotSealing($);' : '', adaptive ? 'installAdaptive($);' : ''].filter(Boolean).join('\n');
 const main = moduleOutput ? `
-const $ = runtime({ ...platform, ...stdStreamOptions() });
-${sealed ? sealBoot + '\n' : ''}await run($);
+const $ = runtime({ ...platform, ...stdStreamOptions()${linked && adaptive && needsEval ? ', aotAdaptive: lowerAdaptive' : ''} });
+${sealBoot ? sealBoot + '\n' : ''}await run($);
 $.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(cell.f(...args)); };
 export default $;
 ` : `
-const $ = runtime({ ...platform, ...stdStreamOptions() });
-${sealed ? sealBoot + '\n' : ''}run($).catch(e => {
+const $ = runtime({ ...platform, ...stdStreamOptions()${linked && adaptive && needsEval ? ', aotAdaptive: lowerAdaptive' : ''} });
+${sealBoot ? sealBoot + '\n' : ''}run($).catch(e => {
   console.error(e && e.message ? e.message : e);
   process.exit(1);
 });
@@ -254,7 +259,7 @@ ${sealed ? sealBoot + '\n' : ''}run($).catch(e => {
 
 // --web platform: a static record (a browser has no process/Deno to probe).
 const webPlatform = `
-const platform = { implementation: 'Browser', release: '', os: 'web', port: '${manifest['kernel-version'] || '1.0.0'}', porters: 'Robert Koeninger' };
+const platform = { implementation: 'Browser', release: '', os: 'web', port: '${platformConfig.port}', porters: 'Robert Koeninger' };
 `;
 
 // --web boot: browser-safe stdin/stdout (console-backed; no stdin), boot the
@@ -278,7 +283,7 @@ const $ = runtime({
   stoutput: new WebOutStream(s => console.log(s)),
   sterror:  new WebOutStream(s => console.error(s)),
 });
-${sealed ? sealBoot + '\n' : ''}await run($);
+${sealBoot ? sealBoot + '\n' : ''}await run($);
 // The one convenience app code needs beyond the minimal runtime, which already
 // exposes toListTree/toArrayTree/lookup/settle (lib/runtime.js). Mirrors caller
 // in lib/frontend.js.
@@ -286,7 +291,7 @@ $.caller = name => { const cell = $.lookup(name); return (...args) => $.settle(c
 export default $;
 `;
 
-if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, directCalls, tailLoops, emitted: aot.emitted, ...aot.report }, null, 2) + '\n');
+if (analyze) fs.writeFileSync(outPath + '.analysis.json', JSON.stringify({ sealed, directCalls, tailLoops, adaptive, adaptiveStats, emitted: aot.emitted, ...aot.report }, null, 2) + '\n');
 
 let artifact;
 
@@ -296,6 +301,7 @@ if (web) {
     embed('runtime.js', src => src.replace(/^export default/m, 'const runtime =')),
     embed('overrides.js', src => src.replace(/^export default/m, 'const overrides =')),
     ...(sealed ? [embed('aot-runtime.js', src => src.replace(/^export default/m, 'const installAotSealing ='))] : []),
+    ...(adaptive ? [embed('aot-adaptive-runtime.js', src => src.replace(/^export default/m, 'const installAdaptive ='))] : []),
     webPlatform,
     program,
     webBoot
@@ -308,6 +314,8 @@ if (web) {
     `import overrides from '${new URL('overrides.js', new URL('../lib/', import.meta.url)).href}';`,
     ...(sealed ? [`import installAotSealing from '${new URL('aot-runtime.js', new URL('../lib/', import.meta.url)).href}';`] : []),
     `import { stdStreamOptions } from '${new URL('streams.node.js', new URL('../lib/', import.meta.url)).href}';`,
+    ...(adaptive ? [linked ? `import installAdaptive from '${new URL('aot-adaptive-runtime.js', new URL('../lib/', import.meta.url)).href}';` : embed('aot-adaptive-runtime.js', src => src.replace(/^export default/m, 'const installAdaptive ='))] : []),
+    ...(adaptive && linked && needsEval ? [`import lowerAdaptive from '${new URL('aot-adaptive.js', new URL('../lib/', import.meta.url)).href}';`] : []),
     platformBoot,
     program,
     main
@@ -320,6 +328,8 @@ if (web) {
     embed('streams.node.js', stripExports),
     embed('overrides.js', src => src.replace(/^export default/m, 'const overrides =')),
     ...(sealed ? [embed('aot-runtime.js', src => src.replace(/^export default/m, 'const installAotSealing ='))] : []),
+    ...(adaptive ? [linked ? `import installAdaptive from '${new URL('aot-adaptive-runtime.js', new URL('../lib/', import.meta.url)).href}';` : embed('aot-adaptive-runtime.js', src => src.replace(/^export default/m, 'const installAdaptive ='))] : []),
+    ...(adaptive && linked && needsEval ? [`import lowerAdaptive from '${new URL('aot-adaptive.js', new URL('../lib/', import.meta.url)).href}';`] : []),
     platformBoot,
     program,
     main
