@@ -8,7 +8,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 if (process.argv.length !== 3) throw new Error('Usage: test.sealed.js NEW_EVIDENCE_DIRECTORY');
 const out = path.resolve(process.argv[2]); fs.mkdirSync(out, { recursive: false });
 const shake = path.join(out, 'shake'); fs.mkdirSync(shake);
-const manifest = ['manifest-version=4', 'kernel-version=43.1', 'kernel=kernel.kl', 'init=shen.initialise', 'user=app.kl', 'needs-eval=false'].join('\n') + '\n';
+const manifest = ['manifest-version=4', 'kernel-version=43.2', 'kernel=kernel.kl', 'init=shen.initialise', 'user=app.kl', 'needs-eval=false'].join('\n') + '\n';
 fs.writeFileSync(path.join(shake, 'yggdrasil.manifest.txt'), manifest);
 fs.writeFileSync(path.join(shake, 'kernel.kl'), '(defun low (X) (+ X 1))\n');
 fs.writeFileSync(path.join(shake, 'app.kl'), `(defun f (X) (+ X 1))

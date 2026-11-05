@@ -8,7 +8,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 if (process.argv.length !== 3) throw new Error('Usage: test.optimizers.js NEW_EVIDENCE_DIRECTORY');
 const out = path.resolve(process.argv[2]); fs.mkdirSync(out);
 const shake = path.join(out, 'shake'); fs.mkdirSync(shake);
-const manifest = 'manifest-version=4\nkernel-version=43.1\nkernel=kernel.kl\ninit=shen.initialise\nuser=app.kl\nneeds-eval=false\n';
+const manifest = 'manifest-version=4\nkernel-version=43.2\nkernel=kernel.kl\ninit=shen.initialise\nuser=app.kl\nneeds-eval=false\n';
 fs.writeFileSync(path.join(shake, 'yggdrasil.manifest.txt'), manifest);
 fs.writeFileSync(path.join(shake, 'kernel.kl'), '(defun low (X) (+ 1 X))');
 fs.writeFileSync(path.join(shake, 'app.kl'), '(defun sum (N X) (if (= N 0) X (sum (- N 1) (+ N X)))) (defun f (X) (+ 1 (host X))) (defun g (X) (+ 1 (f X)))');

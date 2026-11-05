@@ -1,5 +1,5 @@
-// Vendor the unmodified PR117 kernel build, then the pinned upstream benchmark
-// additions at 9693dc6. Both downloads are authenticated before changing kernel/.
+// Vendor the unmodified community ShenOSKernel 43.2 release (Shen-Language/shen-sources,
+// tag shen-43.2). The download is authenticated before changing kernel/.
 // Preserve port provenance; regenerate KL and full-tree verification manifests.
 
 import crypto from 'node:crypto';
@@ -12,19 +12,11 @@ import { formatGrid } from './utils.js';
 
 const { kernelVersion, kernelPath, klPath } = config;
 
-const archiveSha256 = '060066a8f84d9a2f7d41cb3b37b986a8d4653279752b739b5063cd648d9baacd';
-const folderName  = 'ShenOSKernel-43.1-ec16a9f';
+const archiveSha256 = '23c71508f0de24785e1f127ea4fab440081904d81c463090bc642ee840417f32';
+const folderName  = 'ShenOSKernel-43.2';
 const archiveName = `${folderName}.tar.gz`;
-const archiveUrl  = `https://github.com/pyrex41/shen-sources/releases/download/upstream-ec16a9f/${archiveName}`;
+const archiveUrl  = `https://github.com/Shen-Language/shen-sources/releases/download/shen-43.2/${archiveName}`;
 const preserved = ['PROVENANCE.md'];
-// Upstream's only post-117 commit updates these benchmark/coverage files.
-const sourceCommit = '9693dc68b7e1c9c32a91be9233530e8de521172e';
-const sourceSha256 = 'f2c2e608559fc4ee8f3195dabc830aba8db7a5227e4cbce02a346aec607e6d7f';
-const sourceFiles = [
-  'CHANGELOG.md', 'benchmarks/arithmetic.shen', 'benchmarks/benchmarks.shen',
-  'benchmarks/control-flow.shen', 'benchmarks/data.shen', 'benchmarks/equality-check.shen',
-  'benchmarks/pattern-matching.shen', 'doc/benchmarks.md', 'tests/benchmark-coverage.shen'
-];
 
 const vendor = async () => {
   const response = await fetch(archiveUrl, { signal: AbortSignal.timeout(90000) });
@@ -44,21 +36,6 @@ const vendor = async () => {
   const archivePath = path.join(workDir, archiveName);
   fs.writeFileSync(archivePath, data);
   execFileSync('tar', ['-xzf', archivePath, '-C', workDir]);
-
-  const sourceResponse = await fetch(`https://codeload.github.com/Shen-Language/shen-sources/tar.gz/${sourceCommit}`, { signal: AbortSignal.timeout(90000) });
-  if (!sourceResponse.ok) {
-    throw new Error(`Source archive download failed: ${sourceResponse.status}`);
-  }
-  const sourceData = Buffer.from(await sourceResponse.arrayBuffer());
-  if (crypto.createHash('sha256').update(sourceData).digest('hex') !== sourceSha256) {
-    throw new Error('Source archive SHA-256 mismatch');
-  }
-  const sourceArchive = path.join(workDir, 'source.tar.gz');
-  fs.writeFileSync(sourceArchive, sourceData);
-  execFileSync('tar', ['-xzf', sourceArchive, '-C', workDir]);
-  for (const file of sourceFiles) {
-    fs.copyFileSync(path.join(workDir, `shen-sources-${sourceCommit}`, file), path.join(workDir, folderName, file));
-  }
 
   for (const file of preserved) {
     fs.copyFileSync(`${klPath}/${file}`, path.join(workDir, folderName, 'klambda', file));
