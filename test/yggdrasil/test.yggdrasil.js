@@ -54,30 +54,34 @@ for (const { name, expected, linked } of fixtures) {
   }
 }
 
-// ShenOSKernel 43.1 emits manifest version 4. Keep the stage-2 builder's
-// compatibility contract explicit: current 43.1 manifests are accepted
+// ShenOSKernel 43.x emits manifest version 4. Keep the stage-2 builder's
+// compatibility contract explicit: current 43.1 and 43.2 manifests are accepted
 // without a stale-version warning, while unrelated versions still warn.
 {
   const source = path.join(root, 'test/yggdrasil/fixtures/fib');
   const compatDir = fs.mkdtempSync(path.join(os.tmpdir(), 'yggdrasil-manifest-'));
   fs.cpSync(source, compatDir, { recursive: true });
   const manifestPath = path.join(compatDir, 'yggdrasil.manifest.txt');
-  const manifest43 = fs.readFileSync(manifestPath, 'utf8')
-    .replace('manifest-version=2', 'manifest-version=4')
-    .replace('kernel-version=42', 'kernel-version=43.1');
-  fs.writeFileSync(manifestPath, manifest43);
-  const compatOut = path.join(outDir, 'manifest-43.js');
-  const compat = spawnSync(process.execPath,
-    [path.join(root, 'bin/yggdrasil-build.js'), compatDir, compatOut],
-    { encoding: 'utf8' });
-  if (compat.status !== 0 || compat.stderr || compat.stdout.length === 0) {
-    console.error(`  FAIL - Shen 43.1 manifest emitted a compatibility warning or failed: ${JSON.stringify(compat.stderr)}`);
-    failed = true;
-  } else {
-    console.log('  ok - Shen 43.1 / manifest 4 accepted without compatibility warnings');
+  const base = fs.readFileSync(manifestPath, 'utf8');
+  let manifest43 = base;
+  for (const version of ['43.1', '43.2']) {
+    manifest43 = base
+      .replace('manifest-version=2', 'manifest-version=4')
+      .replace('kernel-version=42', `kernel-version=${version}`);
+    fs.writeFileSync(manifestPath, manifest43);
+    const compatOut = path.join(outDir, `manifest-${version}.js`);
+    const compat = spawnSync(process.execPath,
+      [path.join(root, 'bin/yggdrasil-build.js'), compatDir, compatOut],
+      { encoding: 'utf8' });
+    if (compat.status !== 0 || compat.stderr || compat.stdout.length === 0) {
+      console.error(`  FAIL - Shen ${version} manifest emitted a compatibility warning or failed: ${JSON.stringify(compat.stderr)}`);
+      failed = true;
+    } else {
+      console.log(`  ok - Shen ${version} / manifest 4 accepted without compatibility warnings`);
+    }
   }
 
-  const staleManifest = manifest43.replace('manifest-version=4', 'manifest-version=9').replace('kernel-version=43.1', 'kernel-version=99');
+  const staleManifest = manifest43.replace('manifest-version=4', 'manifest-version=9').replace('kernel-version=43.2', 'kernel-version=99');
   fs.writeFileSync(manifestPath, staleManifest);
   const staleOut = path.join(outDir, 'manifest-stale.js');
   const stale = spawnSync(process.execPath,

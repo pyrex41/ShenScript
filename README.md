@@ -16,8 +16,9 @@ An implementation of the [Shen Language](http://www.shenlanguage.org) by [Mark T
   * Easy interop: JS can be called from Shen, Shen can be called from JS.
   * Production webpack bundle (current local build: \~833 KiB minified, \~113 KiB gzip compressed).
 
-The `1.1.0-rc.1` prerelease adds explicit AOT performance profiles for
-Yggdrasil/Ratatoskr output. See [build contracts and measured profiles](docs/aot-release.md).
+The `1.1.0-rc.2` prerelease runs on community ShenOSKernel 43.2 (tag `shen-43.2`,
+commit `e6947f5`), the kernel Yggdrasil v0.1.0 requires of a stage-1 host. It carries
+the explicit AOT performance profiles for Yggdrasil/Ratatoskr output introduced in 1.1.0-rc.1. See [build contracts and measured profiles](docs/aot-release.md).
 Ordinary output keeps dynamic behavior; `--sealed`, `--tail-loops` and
 `--adaptive` are deliberate build choices. Adaptive execution can remove
 incidental internal microtask yields while preserving actual async suspension
@@ -46,7 +47,7 @@ or as a git dependency (`npm install github:pyrex41/ShenScript`), which also tri
 
 ## Building and Testing
 
-First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 43.1** sources, including PR 117 at `ec16a9f` and the latest benchmark expansion at `9693dc6`, including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
+First, run `npm install` as you would with any other Node project. Then run the following scripts build and test the project. The kernel is vendored byte-for-byte under `kernel/` from the community **ShenOSKernel 43.2** release (tag `shen-43.2`, commit `e6947f507ebc`), including its precompiled standard library `kernel/klambda/stlib.kl`. See `kernel/klambda/PROVENANCE.md` for the tag, commit, checksum and lineage history. Run `npm run build-kernel` to render `lib/kernel.js` from a clean checkout — `npm install`'s `prepare` hook does this automatically when `lib/kernel.js` is missing. Steps after `render-kernel` won't work if the kernel hasn't been rendered.
 
 | Script                   | Description                                                                                              |
 |:-------------------------|:---------------------------------------------------------------------------------------------------------|
