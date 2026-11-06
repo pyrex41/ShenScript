@@ -16,7 +16,6 @@ import { stdStreamOptions } from '../lib/streams.node.js';
 // lib/frontend.node.js).
 (async () => {
   const options = stdStreamOptions();
-  const stinput = options.stinput;
   let shen;
   try {
     shen = await createShen(options);
