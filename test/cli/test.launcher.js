@@ -11,9 +11,9 @@
 //   - --version prints the version banner; bad args exit nonzero
 //   - piped stdin EOF exits the REPL cleanly (no infinite "empty stream"
 //     loop) — guarded with a timeout. This is the JS analogue of shen-go's
-//     TestPipedStdinEOFExitsRepl; the fix lives in bin/shen.js (a JS-level
-//     repl loop that breaks on stdin EOF) + lib/streams.node.js (NodeInStream
-//     sets an `eof` flag), since the kernel shen.loop spins forever otherwise.
+//     TestPipedStdinEOFExitsRepl; the REPL's own read (shen.read-evaluate-print
+//     in lib/frontend.node.js, as in Shen/JIT) exits at EOF on the first byte of a
+//     line. A program reading (stinput) still sees -1 or "empty stream".
 //   - -q quiet mode STILL writes pr output to a file. ShenScript (like
 //     shen-cl and shen-go, unlike shen-lua/shen-rust) routes pr to file
 //     streams regardless of *hush*. This is the yggdrasil stage-1 regression.
@@ -112,6 +112,28 @@ describe('CLI launcher (port-authored, mirrors shen-go main_test)', function () 
       const res = runCLI(['repl'], '');
       equal(0, res.status, `repl should exit 0 on empty stdin; stderr:\n${res.stderr}`);
       ok(!res.stdout.includes('empty stream'), `unexpected empty-stream loop:\n${res.stdout}`);
+    });
+  });
+
+  describe('program reads at stdin EOF', () => {
+    it('read-byte gets -1 and the REPL then exits 0', () => {
+      const res = runCLI(['repl'], '(read-byte (stinput))\n');
+      equal(0, res.status, res.stderr);
+      ok(res.stdout.includes('-1'), res.stdout);
+    });
+
+    for (const fn of ['read', 'lineread']) {
+      it(`${fn} reports "empty stream" instead of exiting silently`, () => {
+        const res = runCLI(['repl'], `(${fn} (stinput))\n`);
+        equal(0, res.status, res.stderr);
+        ok(res.stdout.includes('empty stream'), res.stdout);
+      });
+    }
+
+    it('a program can catch its own read at EOF', () => {
+      const res = runCLI(['repl'], '(trap-error (read (stinput)) (/. E caught))\n');
+      equal(0, res.status, res.stderr);
+      ok(res.stdout.includes('caught'), res.stdout);
     });
   });
 
