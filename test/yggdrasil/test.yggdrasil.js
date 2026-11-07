@@ -55,7 +55,7 @@ for (const { name, expected, linked } of fixtures) {
 }
 
 // ShenOSKernel 43.x emits manifest version 4. Keep the stage-2 builder's
-// compatibility contract explicit: current 43.1 and 43.2 manifests are accepted
+// compatibility contract explicit: current 43.1 through 43.4 manifests are accepted
 // without a stale-version warning, while unrelated versions still warn.
 {
   const source = path.join(root, 'test/yggdrasil/fixtures/fib');
@@ -64,7 +64,7 @@ for (const { name, expected, linked } of fixtures) {
   const manifestPath = path.join(compatDir, 'yggdrasil.manifest.txt');
   const base = fs.readFileSync(manifestPath, 'utf8');
   let manifest43 = base;
-  for (const version of ['43.1', '43.2']) {
+  for (const version of ['43.1', '43.2', '43.3', '43.4']) {
     manifest43 = base
       .replace('manifest-version=2', 'manifest-version=4')
       .replace('kernel-version=42', `kernel-version=${version}`);
@@ -81,7 +81,7 @@ for (const { name, expected, linked } of fixtures) {
     }
   }
 
-  const staleManifest = manifest43.replace('manifest-version=4', 'manifest-version=9').replace('kernel-version=43.2', 'kernel-version=99');
+  const staleManifest = manifest43.replace('manifest-version=4', 'manifest-version=9').replace('kernel-version=43.4', 'kernel-version=99');
   fs.writeFileSync(manifestPath, staleManifest);
   const staleOut = path.join(outDir, 'manifest-stale.js');
   const stale = spawnSync(process.execPath,

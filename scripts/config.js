@@ -1,11 +1,11 @@
 export default {
-  kernelVersion: '43.2',
+  kernelVersion: '43.4',
   kernelPath:    'kernel',
   testsPath:     'kernel/tests',
   klPath:        'kernel/klambda',
   klExt:         '.kl',
-  // Modules of the community ShenOSKernel 43.2 release (Shen-Language/shen-sources,
-  // tag shen-43.2, commit e6947f507ebc), booted in this order by scripts/render.js. Every module is a
+  // Modules of the community ShenOSKernel 43.4 release (Shen-Language/shen-sources,
+  // tag shen-43.4, commit f34b307b490880eedcfe1f5e5d3cc24ca3d2602e), booted in this order by scripts/render.js. Every module is a
   // plain list of (defun ...) forms with no top-level side effects, so the order
   // only decides which definition wins when two modules define the same name.
   // All global state (the shen.dict-based *property-vector*, arities, lambda

@@ -4,7 +4,7 @@
 //   node bin/ratatoskr-build.js <shaken-dir> <out.js> [--linked | --web] [--module] [--analyze | --sealed [--no-direct] [--tail-loops]] [--adaptive]
 //
 // <shaken-dir> is a Ratatoskr stage-1 output directory: a tree-shaken
-// kernel (kernel.kl, Shen 42.x, 43.1 or 43.2 defuns in load order), the user
+// kernel (kernel.kl, Shen 42.x or 43.x defuns in load order), the user
 // program as KL (one or more user= files), and ratatoskr.manifest.txt.
 // Every KL form is compiled ahead of time with ShenScript's own compiler
 // (lib/backend.js) and emitted as ONE runnable ES module <out.js>:
@@ -120,8 +120,8 @@ if (manifest.user.length === 0) {
   console.error('manifest lists no user= files');
   process.exit(1);
 }
-if (!/^(?:42(?:\.|-|$)|43\.[12](?:\.|-|$))/.test(manifest['kernel-version'] || '')) {
-  console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder supports 42, 43.1 and 43.2`);
+if (!/^(?:42(?:\.|-|$)|43\.[1-4](?:\.|-|$))/.test(manifest['kernel-version'] || '')) {
+  console.warn(`warning: manifest kernel-version is ${manifest['kernel-version']}, this builder supports 42 and 43.1 through 43.4`);
 }
 if (!['2', '4'].includes(manifest['manifest-version'])) {
   console.warn(`warning: manifest-version is ${manifest['manifest-version']}, this builder understands versions 2 and 4`);
