@@ -27,6 +27,13 @@ const OutStream = class {
   fromCharCodes() { return String.fromCharCode(...this.buffer); }
 };
 
+// File sink for kernel tests that redirect *stoutput* to a file (43.4
+// expand-dynamic warnings capture): buffers bytes, writes the file on close.
+const FileOutStream = class extends OutStream {
+  constructor(path) { super(); this.path = path; }
+  close() { fs.writeFileSync(this.path, Buffer.from(this.buffer)); return null; }
+};
+
 (async () => {
   const stoutput = new OutStream();
 
@@ -36,6 +43,7 @@ const OutStream = class {
     InStream,
     OutStream,
     openRead: path => new InStream(fs.readFileSync(path)),
+    openWrite: path => new FileOutStream(path),
     stoutput
   });
 
