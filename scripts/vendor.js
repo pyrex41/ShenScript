@@ -1,5 +1,5 @@
-// Vendor the unmodified community ShenOSKernel 43.2 release (Shen-Language/shen-sources,
-// tag shen-43.2). The download is authenticated before changing kernel/.
+// Vendor the unmodified community ShenOSKernel 43.4 release (Shen-Language/shen-sources,
+// tag shen-43.4). The download is authenticated before changing kernel/.
 // Preserve port provenance; regenerate KL and full-tree verification manifests.
 
 import crypto from 'node:crypto';
@@ -12,10 +12,10 @@ import { formatGrid } from './utils.js';
 
 const { kernelVersion, kernelPath, klPath } = config;
 
-const archiveSha256 = '23c71508f0de24785e1f127ea4fab440081904d81c463090bc642ee840417f32';
-const folderName  = 'ShenOSKernel-43.2';
+const archiveSha256 = '15e7972e6bf0cd65d37c2eba85750b8839d2dbadda41027eae0c88e5017a2756';
+const folderName  = 'ShenOSKernel-43.4';
 const archiveName = `${folderName}.tar.gz`;
-const archiveUrl  = `https://github.com/Shen-Language/shen-sources/releases/download/shen-43.2/${archiveName}`;
+const archiveUrl  = `https://github.com/Shen-Language/shen-sources/releases/download/shen-43.4/${archiveName}`;
 const preserved = ['PROVENANCE.md'];
 
 const vendor = async () => {

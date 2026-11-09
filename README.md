@@ -16,7 +16,7 @@ An implementation of the [Shen Language](http://www.shenlanguage.org) by [Mark T
   * Easy interop: JS can be called from Shen, Shen can be called from JS.
   * Production webpack bundle (current local build: \~833 KiB minified, \~113 KiB gzip compressed).
 
-The `1.1.0-rc.2` prerelease runs on community ShenOSKernel 43.2 (tag `shen-43.2`,
+Since `1.1.0-rc.2` the vendored kernel moved to community ShenOSKernel 43.4 (tag `shen-43.4`, commit `f34b307`); the rc.2 prerelease runs on community ShenOSKernel 43.2 (tag `shen-43.2`,
 commit `e6947f5`), the kernel Yggdrasil v0.1.0 requires of a stage-1 host. It carries
 the explicit AOT performance profiles for Yggdrasil/Ratatoskr output introduced in 1.1.0-rc.1. See [build contracts and measured profiles](docs/aot-release.md).
 Ordinary output keeps dynamic behavior; `--sealed`, `--tail-loops` and
