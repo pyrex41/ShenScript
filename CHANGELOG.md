@@ -1,12 +1,13 @@
 # Fork changelog
 
-## Unreleased
+## 1.1.0-rc.3 — prerelease
 
 - Move the vendored kernel to the community ShenOSKernel 43.4 release (tag
   `shen-43.4`, commit `f34b307b490880eedcfe1f5e5d3cc24ca3d2602e`, archive sha256
   `15e7972e...a2756`), vendored unmodified by `scripts/vendor.js`; kernel and
   `stlib.kl` are regenerated together. `yggdrasil-build` accepts 43.1 through
-  43.4 manifests.
+  43.4 manifests. Historical performance records below and under `docs/` were
+  not re-measured on 43.4.
 
 ## 1.1.0-rc.2 — prerelease
 
